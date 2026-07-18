@@ -21,5 +21,9 @@ export const initLegendPanel = () => {
 		if (!panel.hidden && !panel.contains(e.target) && !toggle.contains(e.target)) close();
 	});
 
+	document.addEventListener('keydown', e => {
+		if (e.key === 'Escape' && !panel.hidden) close();
+	});
+
 	return { toggle, panel, open, close };
 };

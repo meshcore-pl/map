@@ -5,6 +5,10 @@ const { version } = require('./package.json');
 const { DOMAIN, NODE_ENV, PORT } = process.env;
 const isProd = NODE_ENV === 'production';
 
+// Fetch nodes on boot, then keep the Redis cache warm on an interval
+const { startNodesRefreshJob } = require('./services/nodes.js');
+startNodesRefreshJob();
+
 // Middleware imports
 const timeout = require('./middlewares/timeout.js');
 const logger = require('./middlewares/morgan.js');
@@ -30,7 +34,6 @@ app.use(timeout());
 
 // Routes
 const APIRouter = require('./routes/Api.js');
-
 app.use('/api/v1', APIRouter);
 
 
@@ -38,9 +41,6 @@ app.use('/api/v1', APIRouter);
 app.use((req, res) => RenderError(res, 404));
 app.use((err, req, res, _next) => RenderError(res, 500, err));
 
-// Fetch nodes on boot, then keep the Redis cache warm on an interval
-const { startNodesRefreshJob } = require('./services/nodes.js');
-startNodesRefreshJob();
 
 // Start the server
 app.listen(PORT, () => process.send ? process.send('ready') : console.log(`Server running at ${DOMAIN}:${PORT}`));

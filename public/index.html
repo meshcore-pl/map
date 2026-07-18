@@ -50,6 +50,7 @@
 	<link rel="stylesheet" href="/assets/css/legend.css">
 	<link rel="stylesheet" href="/assets/css/modal.css">
 	<link rel="stylesheet" href="/assets/css/stats.css">
+	<link rel="stylesheet" href="/assets/css/toast.css">
 
 	<!-- schema.org -->
 	<script type="application/ld+json">
@@ -202,8 +203,11 @@
 	<div class="legend-row"><svg class="legend-icon" width="20" height="20"><use href="/assets/icons/node-types.svg#client"></use></svg><span>Dodano ręcznie</span></div>
 </div>
 
+<div class="toast-container" id="toast-container" aria-live="polite"></div>
+
 <script src="/vendor/leaflet/leaflet.js"></script>
 <script src="/vendor/markercluster/leaflet.markercluster.js"></script>
+<script src="/vendor/qrcode/qrcode.min.js"></script>
 <script src="/assets/js/map.js" type="module"></script>
 </body>
 </html>

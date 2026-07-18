@@ -60,7 +60,7 @@ GET /api/v1/nodes?region=all
 - [Material Icons](https://fonts.google.com/icons)
 
 ## Uznania
-Projekt powstał na bazie [map.meshcore.dev](https://github.com/recrof/map.meshcore.dev) autorstwa [recrof](https://github.com/recrof) (Rastislav Vysoký). Kod został znacząco przebudowany i jest udostępniany na licencji MIT.
+Projekt powstał na bazie [map.meshcore.dev](https://github.com/recrof/map.meshcore.dev) autorstwa [recrof](https://github.com/recrof) (Rastislav Vysoký). Kod został znacząco przebudowany i jest udostępniany na tej samej licencji.
 
 ## Licencja
 Projekt jest dostępny na licencji MIT. Szczegóły znajdują się w pliku [LICENSE](LICENSE).

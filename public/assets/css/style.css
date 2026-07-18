@@ -147,6 +147,10 @@ a:active {
 	color: var(--text);
 }
 
+.brand:hover {
+	text-decoration: none;
+}
+
 .brand img {
 	width: 34px;
 	height: 34px;
@@ -719,6 +723,10 @@ a:active {
 	box-shadow: var(--shadow);
 }
 
+.leaflet-fade-anim .leaflet-popup {
+	transition: opacity 0.12s var(--ease);
+}
+
 .leaflet-popup-content a {
 	color: var(--red-bright);
 }
@@ -738,11 +746,24 @@ a:active {
 }
 
 .leaflet-popup-close-button {
+	top: 8px !important;
+	right: 8px !important;
 	color: var(--text-muted) !important;
+	opacity: 0.7;
+	transition: opacity 0.15s ease, color 0.15s ease, transform 0.15s var(--ease);
+}
+
+.leaflet-popup-close-button:hover {
+	opacity: 1;
+	color: var(--red-bright) !important;
+}
+
+.leaflet-popup-close-button:active {
+	transform: scale(0.9);
 }
 
 .leaflet-popup-close-button span {
-	font-size: 30px;
+	font-size: 28px;
 	padding: 5px;
 }
 
@@ -770,6 +791,23 @@ a:active {
 .svg-node-icon {
 	background: none !important;
 	border: none !important;
+}
+
+.node-qr {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: fit-content;
+	margin: 0 auto 14px;
+	padding: 10px;
+	line-height: 0;
+	background: #fff;
+	border-radius: 10px;
+}
+
+.node-qr canvas, .node-qr img {
+	width: 160px;
+	height: 160px;
 }
 
 table.node-info {
@@ -828,13 +866,13 @@ a.coords-link:active {
 	text-decoration: none;
 }
 
-.pubkey-cell {
+.copy-cell {
 	display: inline-flex;
 	align-items: center;
 	gap: 6px;
 }
 
-.pubkey-text {
+.copy-cell-text {
 	word-break: break-all;
 }
 
@@ -869,14 +907,25 @@ time {
 	text-decoration-color: var(--text-muted);
 }
 
+.pointer-help {
+	cursor: help;
+}
+
 .user-actions {
 	display: flex;
-	justify-content: flex-end;
+	align-items: center;
+	justify-content: space-between;
 	gap: 15px;
 	width: 100%;
 	margin-top: 15px;
 	padding-top: 12px;
 	border-top: 1px solid var(--border);
+}
+
+.user-actions-right {
+	display: flex;
+	align-items: center;
+	gap: 15px;
 }
 
 .user-actions a {

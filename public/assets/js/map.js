@@ -1,9 +1,10 @@
-/* global L */
+/* global L, QRCode */
 import { unpack } from '../../vendor/msgpackr/msgpackr.js';
 import * as ntools from './node-utils.js';
 import { initModal } from './modal.js';
 import { initLegendPanel } from './legend.js';
 import { initStatsModal } from './stats.js';
+import { showToast } from './toast.js';
 
 const apiUrl = region => `/api/v1/nodes?region=${region}`;
 
@@ -58,11 +59,11 @@ const types = {
 };
 
 const updateStatusDesc = {
-	'none': 'dodano ręcznie',
-	'recent': 'zaktualizowano niedawno',
-	'stale': 'zaktualizowano jakiś czas temu',
-	'old': 'nie aktualizowano',
-	'extinct': 'zostanie wkrótce usunięty',
+	'none': 'Dodano ręcznie',
+	'recent': 'Zaktualizowano niedawno',
+	'stale': 'Zaktualizowano jakiś czas temu',
+	'old': 'Nie aktualizowano',
+	'extinct': 'Zostanie wkrótce usunięty',
 };
 
 const radioParamDesc = {
@@ -125,14 +126,26 @@ const findPreset = params => presets.find(p =>
 	params.bw === p.params.bw
 ) ?? {};
 
+const withCopyButton = (displayHtml, copyValue, btnTitle, textTitle = '') => `
+	<span class="copy-cell">
+		<span class="copy-cell-text"${textTitle ? ` title="${textTitle}"` : ''}>${displayHtml}</span>
+		<button type="button" class="copy-icon-btn" title="${btnTitle}" data-copy-value="${escapeHtml(copyValue)}">
+			<svg class="icon" aria-hidden="true"><use href="/assets/icons/icons.svg#icon-copy"></use></svg>
+		</button>
+	</span>`;
+
 const columns = {
 	coords: {
 		label: 'Współrzędne',
-		value: val => `<a href="https://google.com/maps/place/${val.replace(' ', '')}" class="coords-link" target="_blank" rel="noopener nofollow">${val}</a>`,
+		value: val => withCopyButton(
+			`<a href="https://google.com/maps/place/${val.replace(' ', '')}" class="coords-link" target="_blank" rel="noopener nofollow">${val}</a>`,
+			val,
+			'Kopiuj współrzędne'
+		),
 	},
 	adv_name: {
 		label: 'Nazwa',
-		value: val => escapeHtml(val),
+		value: val => withCopyButton(escapeHtml(val), val, 'Kopiuj nazwę'),
 	},
 	status: {
 		label: 'Aktualność',
@@ -154,13 +167,12 @@ const columns = {
 	},
 	public_key: {
 		label: 'Klucz publiczny',
-		value: val => `
-			<span class="pubkey-cell">
-				<span class="pubkey-text" title="${escapeHtml(val)}">${escapeHtml(ntools.truncateKey(val))}</span>
-				<button type="button" class="copy-icon-btn" title="Kopiuj klucz publiczny" data-copy-value="${escapeHtml(val)}">
-					<svg class="icon" aria-hidden="true"><use href="/assets/icons/icons.svg#icon-copy"></use></svg>
-				</button>
-			</span>`,
+		value: val => withCopyButton(
+			escapeHtml(ntools.truncateKey(val)),
+			val,
+			'Kopiuj klucz publiczny',
+			escapeHtml(val)
+		),
 	},
 	type: {
 		label: 'Typ',
@@ -182,7 +194,7 @@ const columns = {
 	},
 	link: {
 		label: 'Link Meshcore',
-		value: uint8arr => `<button type="button" class="copy-link-btn" data-mesh-link="meshcore://${uint8arr.toHex()}">Skopiuj do schowka</button>`,
+		value: uint8arr => `<button type="button" class="copy-link-btn" data-copy-value="meshcore://${uint8ArrayToHex(uint8arr)}">Skopiuj do schowka</button>`,
 	},
 };
 
@@ -221,16 +233,52 @@ if you have multiple nodes to delete, put them into single email, delimited by n
 	return deletionMailUrl.toString().replaceAll('+', '%20').replaceAll('\n', '%0A');
 };
 
+const discordTimestamp = date => `<t:${Math.floor(date.getTime() / 1000)}:R>`;
+
+const getNodeInfoText = node => {
+	const lines = [`# ${node.adv_name}`, ''];
+
+	lines.push(`- **Klucz publiczny:** \`${node.public_key}\``);
+	lines.push(`- **Typ:** ${types[node.type]}`);
+	if (node.status) lines.push(`- **Aktualność:** ${updateStatusDesc[node.status]}`);
+	if (node.link) lines.push(`- **Link Meshcore:** \`meshcore://${uint8ArrayToHex(node.link)}\``);
+	lines.push(`- **Dodano:** ${ntools.formatDateTime(node.insertDate)} (${discordTimestamp(node.insertDate)})`);
+	if (node.updatedDate) lines.push(`- **Zaktualizowano:** ${ntools.formatDateTime(node.updatedDate)} (${discordTimestamp(node.updatedDate)})`);
+	lines.push(`- **Współrzędne:** \`${node.coords}\` ([Mapa](https://google.com/maps/place/${node.coords.replace(' ', '')}))`);
+
+	if (node.params) {
+		const preset = findPreset(node.params);
+		lines.push(`- **Preset radiowy:** ${preset?.params?.freq ? preset.name : 'Niestandardowy'}`);
+		lines.push('- **Ustawienia:**');
+		for (const [key, paramVal] of Object.entries(node.params)) {
+			const paramKey = radioParamDesc[key];
+			lines.push(`  - ${paramKey.label}: ${paramVal}${paramKey.unit}`);
+		}
+	}
+
+	return lines.join('\n');
+};
+
 const getNodePopupHTML = node => {
 	const userActionUrl = encodeURI(localStorage.getItem('userActionUrl') || '');
 	const userActionLabel = localStorage.getItem('userActionLabel') || '';
 	const userActionAnchor = userActionUrl ? `<a target="_blank" rel="noopener noreferrer" href="https://${userActionUrl}?nodes=${node.public_key}">${userActionLabel}</a>` : '';
+	const contactParams = new URLSearchParams({
+		name: node.adv_name,
+		public_key: node.public_key,
+		type: node.type,
+	});
+	const qrValue = `meshcore://contact/add?${contactParams.toString()}`;
 
 	return `
+		<div class="node-qr" data-qr-value="${escapeHtml(qrValue)}"></div>
 		${getTable(node)}
 		<div class="user-actions">
-			<a href="${getDeletionMailUrl(node)}" target="_blank">Zgłoś usunięcie węzła</a>
-			${userActionAnchor}
+			<button type="button" class="copy-link-btn" data-copy-value="${escapeHtml(getNodeInfoText(node))}">Skopiuj informacje</button>
+			<div class="user-actions-right">
+				<a href="${getDeletionMailUrl(node)}" target="_blank">Zgłoś usunięcie węzła</a>
+				${userActionAnchor}
+			</div>
 		</div>`;
 };
 
@@ -244,10 +292,10 @@ const getPresets = async () => {
 		name: p.title,
 		desc: p.description,
 		params: {
-			freq: p.frequency,
-			bw: p.bandwidth,
-			sf: p.spreading_factor,
-			cr: p.coding_rate,
+			freq: Number(p.frequency),
+			bw: Number(p.bandwidth),
+			sf: Number(p.spreading_factor),
+			cr: Number(p.coding_rate),
 		},
 	}));
 
@@ -292,6 +340,27 @@ map.attributionControl.setPrefix('<a href="https://leafletjs.com" title="Bibliot
 map.attributionControl.setPosition('bottomleft');
 
 map.addLayer(baseMaps[baseMapSelected]);
+
+map.on('popupopen', e => {
+	requestAnimationFrame(() => {
+		const qrEl = e.popup.getElement()?.querySelector('.node-qr');
+		if (!qrEl || !qrEl.isConnected) return;
+
+		qrEl.innerHTML = '';
+		try {
+			new QRCode(qrEl, {
+				text: qrEl.dataset.qrValue,
+				width: 256,
+				height: 256,
+				colorDark: '#000',
+				colorLight: '#fff',
+				correctLevel: QRCode.CorrectLevel.M,
+			});
+		} catch (err) {
+			console.error('Nie udało się wygenerować kodu QR:', err);
+		}
+	});
+});
 
 const setBaseMap = name => {
 	for (const [key, layer] of Object.entries(baseMaps)) {
@@ -498,9 +567,9 @@ const renderStats = () => {
 
 	statsCounts.innerHTML = `
 		<span>razem: <b>${nodes.length}</b></span>&nbsp;|
-		<svg class="icon pointer-help"><use href="/assets/icons/icons.svg#icon-user"></use></svg><b>${(byType[1] || []).length}</b>&nbsp;|
-		<svg class="icon icon-filled pointer-help"><use href="/assets/icons/node-types.svg#repeater-plain"></use></svg><b>${(byType[2] || []).length}</b>&nbsp;|
-		<svg class="icon pointer-help"><use href="/assets/icons/icons.svg#icon-users"></use></svg><b>${(byType[3] || []).length}</b>
+		<svg class="icon pointer-help" title="Klienci"><use href="/assets/icons/icons.svg#icon-user"></use></svg><b>${(byType[1] || []).length}</b>&nbsp;|
+		<svg class="icon icon-filled pointer-help" title="Repeatery"><use href="/assets/icons/node-types.svg#repeater-plain"></use></svg><b>${(byType[2] || []).length}</b>&nbsp;|
+		<svg class="icon pointer-help" title="Serwery pokoju"><use href="/assets/icons/icons.svg#icon-users"></use></svg><b>${(byType[3] || []).length}</b>
 	`;
 
 	statsModal.render();
@@ -522,8 +591,8 @@ function renderSearchResults() {
 
 	searchResultsEl.hidden = results.length === 0;
 	if (!searchResultsEl.hidden) positionDropdown(searchResultsEl);
-	searchResultsEl.innerHTML = results.map((node, index) => `
-		<li data-index="${index}">
+	searchResultsEl.innerHTML = results.map(node => `
+		<li>
 			<svg width="32" height="32"><use href="/assets/icons/node-types.svg#${nodeTypeIconNames[node.type]}-plain"></use></svg>
 			<div class="search-text">
 				<h6>${highlightString(node.adv_name, state.search)}</h6>
@@ -767,11 +836,8 @@ basemapToggle.addEventListener('click', () => {
 });
 
 document.addEventListener('click', e => {
-	const copyBtn = e.target.closest('.copy-link-btn');
-	if (copyBtn) void navigator.clipboard.writeText(copyBtn.dataset.meshLink);
-
-	const copyIconBtn = e.target.closest('.copy-icon-btn');
-	if (copyIconBtn) void navigator.clipboard.writeText(copyIconBtn.dataset.copyValue);
+	const copyBtn = e.target.closest('.copy-link-btn, .copy-icon-btn');
+	if (copyBtn) void navigator.clipboard.writeText(copyBtn.dataset.copyValue).then(() => showToast('Skopiowano do schowka'));
 });
 
 document.addEventListener('click', e => {

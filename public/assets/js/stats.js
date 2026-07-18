@@ -29,8 +29,8 @@ export const initStatsModal = ({ getNodes, getRepeaters, escapeHtml, timeAgo, on
 			.toSorted((a, b) => b.insertDate.getTime() - a.insertDate.getTime());
 
 		listEl.innerHTML = repeaters.length
-			? repeaters.map((node, index) => `
-				<li data-index="${index}">
+			? repeaters.map(node => `
+				<li>
 					<svg width="28" height="28"><use href="/assets/icons/node-types.svg#repeater-plain"></use></svg>
 					<div class="stats-repeater-text">
 						<h6>${escapeHtml(node.adv_name)}</h6>
