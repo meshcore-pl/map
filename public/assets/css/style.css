@@ -8,36 +8,47 @@
 	--text-muted: #99a1b5;
 	--red: #e01230;
 	--red-bright: #ff3352;
+	--red-light: #ff7d92;
 	--red-dark: #b30d26;
 	--red-glow: rgba(224, 18, 48, 0.35);
+	--blue: #339af0;
+	--blue-bright: #4dabf7;
+	--blue-light: #7cc4f7;
+	--blue-dark: #2f8fd1;
 	--radius: 12px;
 	--radius-sm: 8px;
-	--shadow: 0 8px 28px rgba(0, 0, 0, 0.4);
-	--shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.45), 0 2px 8px rgba(0, 0, 0, 0.3);
+	--shadow: 0 0 28px rgba(0, 0, 0, 0.4);
+	--shadow-lg: 0 0 40px rgba(0, 0, 0, 0.45), 0 0 8px rgba(0, 0, 0, 0.3);
 	--font-body: 'Archivo', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 	--font-mono: 'IBM Plex Mono', ui-monospace, 'Cascadia Mono', Consolas, monospace;
 	--ease: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Custom scrollbars for dark panels */
-.legend-panel, .settings-panel, .search-results, .filters-menu {
+* {
+	box-sizing: border-box;
 	scrollbar-width: thin;
 	scrollbar-color: var(--border-strong) transparent;
 }
 
-.legend-panel::-webkit-scrollbar, .settings-panel::-webkit-scrollbar,
-.search-results::-webkit-scrollbar, .filters-menu::-webkit-scrollbar {
-	width: 8px;
+*::-webkit-scrollbar {
+	width: 10px;
+	height: 10px;
 }
 
-.legend-panel::-webkit-scrollbar-thumb, .settings-panel::-webkit-scrollbar-thumb,
-.search-results::-webkit-scrollbar-thumb, .filters-menu::-webkit-scrollbar-thumb {
+*::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
 	background: var(--border-strong);
+	border: 2px solid transparent;
 	border-radius: 999px;
+	background-clip: padding-box;
 }
 
-* {
-	box-sizing: border-box;
+*::-webkit-scrollbar-thumb:hover {
+	background: var(--text-muted);
+	background-clip: padding-box;
 }
 
 html, body {
@@ -49,8 +60,24 @@ html, body {
 }
 
 ::selection {
-	background: var(--red);
+	background: var(--blue);
 	color: #fff;
+}
+
+a {
+	color: var(--red-bright);
+	text-decoration: none;
+	transition: color 0.15s ease;
+}
+
+a:hover {
+	color: var(--red-light);
+	text-decoration: underline;
+}
+
+a:active {
+	color: var(--red-dark);
+	text-decoration: none;
 }
 
 .icon {
@@ -118,7 +145,6 @@ html, body {
 	gap: 9px;
 	flex-shrink: 0;
 	color: var(--text);
-	text-decoration: none;
 }
 
 .brand img {
@@ -178,8 +204,8 @@ html, body {
 }
 
 #stats-counts .icon {
-	width: 17px;
-	height: 17px;
+	width: 21px;
+	height: 21px;
 	color: var(--red-bright);
 	margin-left: 6px;
 	margin-right: 1px;
@@ -274,11 +300,11 @@ html, body {
 
 .region-toggle-btn:hover {
 	background: var(--bg-panel-hover);
-	border-color: var(--border-strong);
+	border-color: var(--red-dark);
 }
 
 .region-toggle-btn:active {
-	transform: scale(0.96);
+	transform: scale(0.95);
 }
 
 .region-toggle-btn.active {
@@ -296,12 +322,11 @@ html, body {
 	align-items: center;
 	flex-shrink: 0;
 	opacity: 0.75;
-	transition: opacity 0.15s ease, transform 0.2s var(--ease);
+	transition: opacity 0.15s ease;
 }
 
 .github-link:hover {
 	opacity: 1;
-	transform: rotate(-8deg);
 }
 
 .github-link .icon {
@@ -331,7 +356,6 @@ html, body {
 	border: none;
 	border-radius: 50%;
 	box-shadow: var(--shadow-lg);
-	text-decoration: none;
 	cursor: pointer;
 	transition: transform 0.2s var(--ease), box-shadow 0.2s var(--ease);
 }
@@ -341,7 +365,7 @@ html, body {
 }
 
 .fab:active {
-	transform: scale(0.94);
+	transform: scale(0.95);
 }
 
 .fab .icon {
@@ -359,7 +383,7 @@ html, body {
 }
 
 .fab-secondary {
-	background: var(--bg-panel);
+	background: rgba(26, 29, 38, 0.65);
 	-webkit-backdrop-filter: blur(6px);
 	backdrop-filter: blur(6px);
 	color: var(--text);
@@ -367,7 +391,7 @@ html, body {
 }
 
 .fab-secondary:hover {
-	background: var(--bg-panel-hover);
+	background: rgba(38, 43, 56, 0.75);
 }
 
 .fab-secondary.active {
@@ -431,7 +455,7 @@ html, body {
 }
 
 .icon-btn:active {
-	transform: scale(0.92);
+	transform: scale(0.95);
 }
 
 .icon-btn.active {
@@ -695,6 +719,20 @@ html, body {
 	box-shadow: var(--shadow);
 }
 
+.leaflet-popup-content a {
+	color: var(--red-bright);
+}
+
+.leaflet-popup-content a:hover {
+	color: var(--red-light);
+	text-decoration: underline;
+}
+
+.leaflet-popup-content a:active {
+	color: var(--red-dark);
+	text-decoration: none;
+}
+
 .leaflet-popup-tip {
 	background: var(--bg-panel-solid);
 }
@@ -726,8 +764,7 @@ html, body {
 }
 
 .leaflet-marker-icon.update-extinct, .legend-icon.update-extinct {
-	filter: grayscale(100) contrast(16);
-	opacity: 0.6;
+	filter: grayscale(100);
 }
 
 .svg-node-icon {
@@ -756,17 +793,73 @@ table.node-info tr td:last-child {
 	word-break: break-all;
 }
 
-table.node-info a {
-	color: var(--red-bright);
-}
-
 .copy-link-btn {
 	font: inherit;
-	color: var(--red-bright);
+	color: var(--blue-bright);
 	background: none;
 	border: none;
 	padding: 0;
 	cursor: pointer;
+	transition: color 0.15s ease;
+}
+
+.copy-link-btn:hover {
+	color: var(--blue-light);
+	text-decoration: underline;
+}
+
+.copy-link-btn:active {
+	color: var(--blue-dark);
+	text-decoration: none;
+}
+
+a.coords-link {
+	color: var(--blue-bright);
+	transition: color 0.15s ease;
+}
+
+a.coords-link:hover {
+	color: var(--blue-light);
+	text-decoration: underline;
+}
+
+a.coords-link:active {
+	color: var(--blue-dark);
+	text-decoration: none;
+}
+
+.pubkey-cell {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+}
+
+.pubkey-text {
+	word-break: break-all;
+}
+
+.copy-icon-btn {
+	flex-shrink: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 20px;
+	height: 20px;
+	padding: 0;
+	border: none;
+	background: none;
+	color: var(--text-muted);
+	cursor: pointer;
+	transition: color 0.15s ease;
+}
+
+.copy-icon-btn:hover {
+	color: var(--red-bright);
+}
+
+.copy-icon-btn .icon {
+	width: 15px;
+	height: 15px;
 }
 
 time {
@@ -778,7 +871,8 @@ time {
 
 .user-actions {
 	display: flex;
-	justify-content: space-between;
+	justify-content: flex-end;
+	gap: 15px;
 	width: 100%;
 	margin-top: 15px;
 	padding-top: 12px;
@@ -786,7 +880,6 @@ time {
 }
 
 .user-actions a {
-	color: var(--red-bright);
 	font-size: 0.85rem;
 }
 

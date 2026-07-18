@@ -4,6 +4,8 @@ import * as ntools from './node-utils.js';
 import { initModal } from './modal.js';
 import { initLegendPanel } from './legend.js';
 import { initStatsModal } from './stats.js';
+import { formatDateTime } from './date-format.js';
+import { truncateKey } from './key-format.js';
 
 const apiUrl = region => `/api/v1/nodes?region=${region}`;
 
@@ -128,7 +130,7 @@ const findPreset = params => presets.find(p =>
 const columns = {
 	coords: {
 		label: 'Współrzędne',
-		value: val => `<a target="_blank" rel="noopener noreferrer" href="https://google.com/maps/place/${val.replace(' ', '')}">${val}</a>`,
+		value: val => `<a href="https://google.com/maps/place/${val.replace(' ', '')}" class="coords-link" target="_blank" rel="noopener nofollow">${val}</a>`,
 	},
 	adv_name: {
 		label: 'Nazwa',
@@ -142,18 +144,25 @@ const columns = {
 		label: 'Dodano',
 		value: val => {
 			const dt = new Date(val);
-			return `<time datetime="${val}" title="${dt.toLocaleString()}">${timeAgo(dt.getTime())}</time>`;
+			return `<time datetime="${val}" title="${formatDateTime(dt)}">${timeAgo(dt.getTime())}</time>`;
 		},
 	},
 	updated_date: {
 		label: 'Zaktualizowano',
 		value: val => {
 			const dt = new Date(val);
-			return `<time datetime="${val}" title="${dt.toLocaleString()}">${timeAgo(dt.getTime())}</time>`;
+			return `<time datetime="${val}" title="${formatDateTime(dt)}">${timeAgo(dt.getTime())}</time>`;
 		},
 	},
 	public_key: {
 		label: 'Klucz publiczny',
+		value: val => `
+			<span class="pubkey-cell">
+				<span class="pubkey-text" title="${escapeHtml(val)}">${escapeHtml(truncateKey(val))}</span>
+				<button type="button" class="copy-icon-btn" title="Kopiuj klucz publiczny" data-copy-value="${escapeHtml(val)}">
+					<svg class="icon" aria-hidden="true"><use href="/assets/icons/icons.svg#icon-copy"></use></svg>
+				</button>
+			</span>`,
 	},
 	type: {
 		label: 'Typ',
@@ -371,7 +380,7 @@ const ensurePopup = marker => {
 
 	const node = markerToNode.get(marker);
 	if (node) {
-		marker.bindPopup(L.popup({ minWidth: 350, maxWidth: 350, content: () => getNodePopupHTML(node) }));
+		marker.bindPopup(L.popup({ minWidth: 390, maxWidth: 390, content: () => getNodePopupHTML(node) }));
 		marker._popupBound = true;
 	}
 };
@@ -520,7 +529,7 @@ function renderSearchResults() {
 			<svg width="32" height="32"><use href="/assets/icons/node-types.svg#${nodeTypeIconNames[node.type]}-plain"></use></svg>
 			<div class="search-text">
 				<h6>${highlightString(node.adv_name, state.search)}</h6>
-				<div class="search-pkey">${highlightString(node.public_key, state.search)}</div>
+				<div class="search-pkey">${highlightString(truncateKey(node.public_key), state.search)}</div>
 			</div>
 		</li>
 	`).join('');
@@ -762,6 +771,9 @@ basemapToggle.addEventListener('click', () => {
 document.addEventListener('click', e => {
 	const copyBtn = e.target.closest('.copy-link-btn');
 	if (copyBtn) void navigator.clipboard.writeText(copyBtn.dataset.meshLink);
+
+	const copyIconBtn = e.target.closest('.copy-icon-btn');
+	if (copyIconBtn) void navigator.clipboard.writeText(copyIconBtn.dataset.copyValue);
 });
 
 document.addEventListener('click', e => {
