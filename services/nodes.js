@@ -12,6 +12,8 @@ const POLAND_BBOX = { latMin: 48.9, latMax: 54.95, lonMin: 14.0, lonMax: 24.2 };
 const isInPoland = node => node.lat >= POLAND_BBOX.latMin && node.lat <= POLAND_BBOX.latMax &&
 	node.lon >= POLAND_BBOX.lonMin && node.lon <= POLAND_BBOX.lonMax;
 
+let lastRefreshedAt = null;
+
 const refreshNodes = async () => {
 	try {
 		const { data } = await axios.get(UPSTREAM_URL, { responseType: 'arraybuffer' });
@@ -23,6 +25,7 @@ const refreshNodes = async () => {
 			RedisClient.set(REDIS_KEYS.pl, plBuffer),
 		]);
 
+		lastRefreshedAt = new Date();
 		console.log(`[nodes] Cache refreshed (all: ${allBuffer.byteLength} bytes, pl: ${plBuffer.byteLength} bytes)`);
 	} catch (err) {
 		console.error('[nodes] Failed to refresh cache:', err.message || err.stack);
@@ -31,9 +34,11 @@ const refreshNodes = async () => {
 
 const getCachedNodes = (region = 'pl') => RedisClient.withTypeMapping({ [RESP_TYPES.BLOB_STRING]: Buffer }).get(REDIS_KEYS[region] || REDIS_KEYS.pl);
 
+const getLastRefreshedAt = () => lastRefreshedAt;
+
 const startNodesRefreshJob = () => {
 	void refreshNodes();
 	setInterval(refreshNodes, REFRESH_INTERVAL_MS);
 };
 
-module.exports = { refreshNodes, getCachedNodes, startNodesRefreshJob };
+module.exports = { refreshNodes, getCachedNodes, getLastRefreshedAt, startNodesRefreshJob };

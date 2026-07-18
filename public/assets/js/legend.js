@@ -1,29 +1,6 @@
+import { initModal } from './modal.js';
+
 export const initLegendPanel = () => {
-	const toggle = document.getElementById('legend-toggle');
-	const panel = document.getElementById('legend-panel');
-
-	const close = () => {
-		panel.hidden = true;
-		toggle.classList.remove('active');
-	};
-
-	const open = () => {
-		panel.hidden = false;
-		toggle.classList.add('active');
-	};
-
-	toggle.addEventListener('click', () => {
-		if (panel.hidden) open();
-		else close();
-	});
-
-	document.addEventListener('click', e => {
-		if (!panel.hidden && !panel.contains(e.target) && !toggle.contains(e.target)) close();
-	});
-
-	document.addEventListener('keydown', e => {
-		if (e.key === 'Escape' && !panel.hidden) close();
-	});
-
+	const { toggle, overlay: panel, open, close } = initModal('legend-toggle', 'legend-panel', { closeOnOutsideClick: true });
 	return { toggle, panel, open, close };
 };

@@ -116,7 +116,6 @@ a:active {
 	background: #0a0c11;
 }
 
-/* Stats bar */
 .stats-bar {
 	position: fixed;
 	z-index: 1000;
@@ -219,7 +218,6 @@ a:active {
 	padding: 8px;
 }
 
-/* Inline search */
 .search-inline {
 	position: relative;
 	display: flex;
@@ -339,7 +337,6 @@ a:active {
 	color: var(--text);
 }
 
-/* Floating action buttons */
 .fab-stack {
 	position: fixed;
 	z-index: 1000;
@@ -418,7 +415,6 @@ a:active {
 	margin-top: 0;
 }
 
-/* Search dropdowns (filters + results), anchored under .search-inline */
 .date-input {
 	font: inherit;
 	color: var(--text);
@@ -679,7 +675,6 @@ a:active {
 	font-weight: 700;
 }
 
-/* Leaflet overrides */
 .leaflet-bottom {
 	position: fixed !important;
 }

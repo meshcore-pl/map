@@ -1,6 +1,6 @@
 const router = require('express').Router();
-const { ApiError } = require('../utils/httpError.js');
-const { getCachedNodes } = require('../services/nodes.js');
+const ApiError = require('../utils/httpError.js');
+const { getCachedNodes, getLastRefreshedAt } = require('../services/nodes.js');
 
 router.get('/nodes', async (req, res) => {
 	try {
@@ -10,6 +10,10 @@ router.get('/nodes', async (req, res) => {
 
 		res.set('Content-Type', 'application/octet-stream');
 		res.set('Cache-Control', 'no-store');
+
+		const lastRefreshedAt = getLastRefreshedAt();
+		if (lastRefreshedAt) res.set('X-Data-Updated', lastRefreshedAt.toISOString());
+
 		res.send(nodes);
 	} catch (err) {
 		ApiError(res, 500, err);

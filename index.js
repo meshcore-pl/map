@@ -12,15 +12,14 @@ startNodesRefreshJob();
 // Middleware imports
 const timeout = require('./middlewares/timeout.js');
 const logger = require('./middlewares/morgan.js');
-const { globalLimiter } = require('./middlewares/ratelimit.js');
-const { RenderError } = require('./utils/httpError.js');
+const globalLimiter = require('./middlewares/ratelimit.js');
+const ApiError = require('./utils/httpError.js');
 
 // Create an Express app
 const app = express();
 
 // Configure the app
 if (isProd) app.set('trust proxy', 1);
-app.set('view engine', 'ejs');
 app.locals.domain = DOMAIN;
 app.locals.version = version;
 
@@ -38,8 +37,8 @@ app.use('/api/v1', APIRouter);
 
 
 // Error handling
-app.use((req, res) => RenderError(res, 404));
-app.use((err, req, res, _next) => RenderError(res, 500, err));
+app.use((req, res) => ApiError(res, 404));
+app.use((err, req, res, _next) => ApiError(res, 500, err));
 
 
 // Start the server

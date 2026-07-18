@@ -79,7 +79,7 @@
 <main id="map"></main>
 <div id="loading-overlay" role="status" aria-live="polite" aria-label="Ładowanie węzłów" hidden></div>
 
-<header class="stats-bar" id="stats-bar">
+<header class="stats-bar">
 	<a class="brand" href="https://meshcorepolska.org/" target="_blank" rel="noopener" title="MeshCore Polska">
 		<img src="https://meshcorepolska.org/images/brand/logo-3-80.png" alt="" width="34" height="34">
 		<span class="brand-name">MeshCore <strong>Polska</strong></span>
@@ -201,6 +201,8 @@
 	<div class="legend-row"><svg class="legend-icon update-old" width="20" height="20"><use href="/assets/icons/node-types.svg#client"></use></svg><span>Dawno nieaktualizowany</span></div>
 	<div class="legend-row"><svg class="legend-icon update-extinct" width="20" height="20"><use href="/assets/icons/node-types.svg#client"></use></svg><span>Zostanie wkrótce usunięty</span></div>
 	<div class="legend-row"><svg class="legend-icon" width="20" height="20"><use href="/assets/icons/node-types.svg#client"></use></svg><span>Dodano ręcznie</span></div>
+
+	<div class="legend-footer">Godzina aktualizacji danych: <span id="legend-updated-at">-</span></div>
 </div>
 
 <div class="toast-container" id="toast-container" aria-live="polite"></div>

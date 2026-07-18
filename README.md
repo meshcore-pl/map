@@ -33,7 +33,7 @@ Następnie uzupełnij dane dostępowe do Redis w utworzonym pliku `.env`.
 
 Uruchom serwer poleceniem:
 ```bash
-node index.js
+node .
 ```
 
 Mapa będzie dostępna domyślnie pod adresem `http://127.0.0.1:8080`.
@@ -57,7 +57,6 @@ GET /api/v1/nodes?region=all
 - [msgpackr](https://github.com/kriszyp/msgpackr)
 - [Express](https://github.com/expressjs/express)
 - [Redis](https://github.com/redis/node-redis)
-- [Material Icons](https://fonts.google.com/icons)
 
 ## Uznania
 Projekt powstał na bazie [map.meshcore.dev](https://github.com/recrof/map.meshcore.dev) autorstwa [recrof](https://github.com/recrof) (Rastislav Vysoký). Kod został znacząco przebudowany i jest udostępniany na tej samej licencji.

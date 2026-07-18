@@ -181,8 +181,8 @@ const columns = {
 	preset: {
 		label: 'Preset radiowy',
 		value: val => {
-			const preset = findPreset(val) || {};
-			return preset?.params?.freq ? preset.name : 'Niestandardowy';
+			const preset = findPreset(val);
+			return preset.params?.freq ? preset.name : 'Niestandardowy';
 		},
 	},
 	params: {
@@ -248,7 +248,7 @@ const getNodeInfoText = node => {
 
 	if (node.params) {
 		const preset = findPreset(node.params);
-		lines.push(`- **Preset radiowy:** ${preset?.params?.freq ? preset.name : 'Niestandardowy'}`);
+		lines.push(`- **Preset radiowy:** ${preset.params?.freq ? preset.name : 'Niestandardowy'}`);
 		lines.push('- **Ustawienia:**');
 		for (const [key, paramVal] of Object.entries(node.params)) {
 			const paramKey = radioParamDesc[key];
@@ -406,6 +406,7 @@ const freqFilterGroup = document.getElementById('freq-filter-group');
 const freqFilterList = document.getElementById('freq-filter-list');
 const clearFiltersBtn = document.getElementById('clear-filters-btn');
 const nodeTypeCheckboxes = [...document.querySelectorAll('.node-type-checkbox')];
+const legendUpdatedAtEl = document.getElementById('legend-updated-at');
 
 const state = {
 	search: '',
@@ -507,8 +508,6 @@ const refreshMap = ({ clusteringZoom = 0 } = {}) => {
 	map.addLayer(markerClusterGroup);
 };
 
-// showNode and renderSearchResults call each other, so they stay as hoisted function
-// declarations - a genuine mutual reference that const arrow functions can't express.
 function showNode(node) {
 	ensurePopup(node.marker);
 	node.marker.openPopup();
@@ -519,10 +518,10 @@ function showNode(node) {
 }
 
 const highlightString = (source, toHighlight) => {
-	const escapedSource = source.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
+	const escapedSource = escapeHtml(source);
 	const matchIndex = source.toLowerCase().indexOf(toHighlight.toLowerCase());
 	const highlight = matchIndex >= 0 ? source.substring(matchIndex, matchIndex + toHighlight.length) : toHighlight;
-	return escapedSource.replace(highlight, `<b>${highlight}</b>`);
+	return escapedSource.replace(escapeHtml(highlight), `<b>${escapeHtml(highlight)}</b>`);
 };
 
 const syncUrlParams = () => {
@@ -683,12 +682,17 @@ const inflateNode = node => {
 
 const nodesCache = {};
 
+const renderLegendUpdatedAt = dataUpdatedAt => {
+	legendUpdatedAtEl.textContent = dataUpdatedAt ? new Date(dataUpdatedAt).toLocaleTimeString(navigator.languages || navigator.language) : '-';
+};
+
 const applyDownloadedNodes = cached => {
 	state.nodesByType = cached.byType;
 	state.nodes = cached.nodes;
 	state.availableFreqs = cached.availableFreqs;
 	renderStats();
 	renderFreqFilters();
+	renderLegendUpdatedAt(cached.dataUpdatedAt);
 };
 
 const downloadNodes = async region => {
@@ -714,6 +718,7 @@ const downloadNodes = async region => {
 	try {
 		setLoading(true);
 		const nodesReq = await fetch(apiUrl(region));
+		const dataUpdatedAt = nodesReq.headers.get('X-Data-Updated');
 		const nodesBlob = await nodesReq.blob();
 		const nodes = unpack(await nodesBlob.arrayBuffer());
 
@@ -757,7 +762,7 @@ const downloadNodes = async region => {
 			}
 		}
 
-		nodesCache[region] = { nodes, byType, availableFreqs: [...freqSet].sort((a, b) => a - b) };
+		nodesCache[region] = { nodes, byType, availableFreqs: [...freqSet].sort((a, b) => a - b), dataUpdatedAt };
 		applyDownloadedNodes(nodesCache[region]);
 	}
 	catch (e) {
