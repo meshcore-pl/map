@@ -24,7 +24,7 @@ Interaktywna mapa węzłów sieci MeshCore w Polsce i na świecie. Projekt skła
 
 ## Instalacja
 ```bash
-git clone https://github.com/meshcore-pl/map.git
+git clone https://github.com/meshcore-pl/map.git mapa.meshcorepolska.org
 cd mapa.meshcorepolska.org
 npm install
 cp .env.example .env
