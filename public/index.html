@@ -49,6 +49,7 @@
 	<link rel="stylesheet" href="/assets/css/style.css">
 	<link rel="stylesheet" href="/assets/css/legend.css">
 	<link rel="stylesheet" href="/assets/css/modal.css">
+	<link rel="stylesheet" href="/assets/css/stats.css">
 
 	<!-- schema.org -->
 	<script type="application/ld+json">
@@ -84,6 +85,9 @@
 	</a>
 	<span class="stats-divider"></span>
 	<span id="stats-counts"></span>
+	<button type="button" class="region-toggle-btn" id="stats-toggle" title="Nowe węzły i repeatery">
+		<svg class="icon" aria-hidden="true"><use href="/assets/icons/icons.svg#icon-chart"></use></svg>
+	</button>
 
 	<span class="spacer"></span>
 	<form class="search-inline" id="search-form">
@@ -99,6 +103,10 @@
 	<button type="button" class="region-toggle-btn" id="region-toggle" title="Pokaż wszystkie węzły na świecie">
 		<svg class="icon" aria-hidden="true"><use href="/assets/icons/icons.svg#icon-globe"></use></svg>
 		<span id="region-toggle-label">Tylko Polska</span>
+	</button>
+	<button type="button" class="region-toggle-btn" id="basemap-toggle" title="Przełącz na widok satelitarny">
+		<svg class="icon" aria-hidden="true"><use href="/assets/icons/icons.svg#icon-layers"></use></svg>
+		<span id="basemap-toggle-label">Mapa</span>
 	</button>
 	<a href="https://github.com/meshcore-pl/map" class="github-link" title="Przejdź do repozytorium GitHub" target="_blank" rel="noopener">
 		<svg class="icon" aria-hidden="true"><use href="/assets/icons/icons.svg#icon-github"></use></svg>
@@ -157,6 +165,25 @@
 	<div class="settings-panel" id="settings-panel" role="dialog" aria-modal="true" aria-labelledby="settings-title">
 		<div class="legend-title" id="settings-title">Ustawienia</div>
 		<p class="settings-placeholder">Wkrótce pojawią się tutaj opcje.</p>
+	</div>
+</div>
+
+<div class="modal-overlay" id="stats-overlay" hidden>
+	<div class="stats-panel" id="stats-panel" role="dialog" aria-modal="true" aria-labelledby="stats-title">
+		<div class="legend-title" id="stats-title">Nowe węzły</div>
+		<div class="stats-chips">
+			<div class="stats-chip"><span class="stats-chip-label">24h</span><span class="stats-chip-value" id="stats-chip-24h">0</span></div>
+			<div class="stats-chip"><span class="stats-chip-label">7d</span><span class="stats-chip-value" id="stats-chip-7d">0</span></div>
+			<div class="stats-chip"><span class="stats-chip-label">30d</span><span class="stats-chip-value" id="stats-chip-30d">0</span></div>
+		</div>
+
+		<div class="legend-title">Nowe repeatery</div>
+		<div class="stats-period-group" role="group" aria-label="Zakres czasu">
+			<button type="button" class="stats-period-btn active" data-period="24h">24h</button>
+			<button type="button" class="stats-period-btn" data-period="7d">7d</button>
+			<button type="button" class="stats-period-btn" data-period="30d">30d</button>
+		</div>
+		<ul class="stats-repeater-list" id="stats-repeater-list"></ul>
 	</div>
 </div>
 

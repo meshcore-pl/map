@@ -1,4 +1,4 @@
-export function initLegendPanel() {
+export const initLegendPanel = () => {
 	const toggle = document.getElementById('legend-toggle');
 	const panel = document.getElementById('legend-panel');
 
@@ -22,4 +22,4 @@ export function initLegendPanel() {
 	});
 
 	return { toggle, panel, open, close };
-}
+};

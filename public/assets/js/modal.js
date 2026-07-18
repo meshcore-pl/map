@@ -1,6 +1,6 @@
-export function initSettingsModal() {
-	const toggle = document.getElementById('settings-toggle');
-	const overlay = document.getElementById('settings-overlay');
+export const initModal = (toggleId, overlayId) => {
+	const toggle = document.getElementById(toggleId);
+	const overlay = document.getElementById(overlayId);
 
 	const close = () => {
 		overlay.hidden = true;
@@ -26,4 +26,4 @@ export function initSettingsModal() {
 	});
 
 	return { toggle, overlay, open, close };
-}
+};

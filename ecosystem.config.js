@@ -1,6 +1,6 @@
 module.exports = {
 	apps: [{
-		name: 'mmc',
+		name: 'mcm',
 		script: './index.js',
 
 		// Logging configuration

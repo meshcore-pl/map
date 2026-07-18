@@ -1,5 +1,4 @@
-# Polska Mapa MeshCore 🗺️
-
+# Polska mapa MeshCore 🗺️
 Interaktywna mapa węzłów sieci MeshCore w Polsce i na świecie. Projekt składa się z lekkiego frontendu mapowego oraz backendu Node.js, który pobiera dane z publicznego API MeshCore i przechowuje je w pamięci podręcznej Redis.
 
 ## Funkcje

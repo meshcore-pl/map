@@ -1,8 +1,9 @@
 /* global L */
 import { unpack } from '../../vendor/msgpackr/msgpackr.js';
 import * as ntools from './node-utils.js';
-import { initSettingsModal } from './modal.js';
+import { initModal } from './modal.js';
 import { initLegendPanel } from './legend.js';
+import { initStatsModal } from './stats.js';
 
 const apiUrl = region => `/api/v1/nodes?region=${region}`;
 
@@ -251,17 +252,19 @@ const getPresets = async () => {
 	return presets;
 };
 
-const baseMapSelected = localStorage.getItem('baseMapSelected') || 'OpenStreetMap';
 const baseMaps = {
 	'OpenStreetMap': L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
 		maxZoom: 19,
-		attribution: 'Tiles: &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+		attribution: 'Kafelki: &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
 	}),
 	'Esri Satellite': L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
 		maxZoom: 18,
-		attribution: 'Tiles: &copy; Esri | Sources: Esri, DigitalGlobe, GeoEye, i-cubed, USDA FSA, USGS, AEX, Getmapping, Aerogrid, IGN, IGP, swisstopo, GIS Users',
+		attribution: 'Kafelki: &copy; Esri',
 	}),
 };
+
+const storedBaseMap = localStorage.getItem('baseMapSelected');
+const baseMapSelected = Object.hasOwn(baseMaps, storedBaseMap) ? storedBaseMap : 'OpenStreetMap';
 
 const urlParams = Object.fromEntries(new URLSearchParams(location.search));
 let initialView = { lat: 52.2893, lon: 19.1162, zoom: 7 };
@@ -275,16 +278,24 @@ const map = window.leafletMap = L.map('map', {
 		[-90, -180],
 		[90, 200],
 	],
-	layers: baseMaps[baseMapSelected],
 	zoomControl: false,
 }).setView([initialView.lat, initialView.lon], initialView.zoom);
 
-map.attributionControl.setPrefix('<a href="https://leafletjs.com" title="A JS library for interactive maps">Leaflet</a>');
+map.attributionControl.setPrefix('<a href="https://leafletjs.com" title="Biblioteka JS do map interaktywnych">Leaflet</a>');
 map.attributionControl.setPosition('bottomleft');
 
-map.on('baselayerchange', ev => localStorage.setItem('baseMapSelected', ev.name));
+map.addLayer(baseMaps[baseMapSelected]);
 
-L.control.layers(baseMaps, null, { position: 'bottomleft' }).addTo(map);
+const setBaseMap = name => {
+	for (const [key, layer] of Object.entries(baseMaps)) {
+		if (key === name) {
+			if (!map.hasLayer(layer)) map.addLayer(layer);
+		} else if (map.hasLayer(layer)) {
+			map.removeLayer(layer);
+		}
+	}
+	localStorage.setItem('baseMapSelected', name);
+};
 
 const nodeTypeIconNames = { 1: 'client', 2: 'repeater', 3: 'room-server', 4: 'sensor' };
 
@@ -302,10 +313,10 @@ const loadingOverlay = document.getElementById('loading-overlay');
 const statsCounts = document.getElementById('stats-counts');
 const regionToggle = document.getElementById('region-toggle');
 const regionToggleLabel = document.getElementById('region-toggle-label');
-const settingsModal = initSettingsModal();
+const basemapToggle = document.getElementById('basemap-toggle');
+const basemapToggleLabel = document.getElementById('basemap-toggle-label');
+const settingsModal = initModal('settings-toggle', 'settings-overlay');
 const legendPanelUi = initLegendPanel();
-settingsModal.toggle.addEventListener('click', () => legendPanelUi.close());
-legendPanelUi.toggle.addEventListener('click', () => settingsModal.close());
 const searchInline = document.getElementById('search-form');
 const searchInput = document.getElementById('search-input');
 const searchResultsEl = document.getElementById('search-results');
@@ -333,6 +344,20 @@ const state = {
 	nodesByType: {},
 	filteredNodes: [],
 };
+
+const statsModal = initStatsModal({
+	getNodes: () => state.nodes,
+	getRepeaters: () => state.nodesByType[2] || [],
+	escapeHtml,
+	timeAgo,
+	onFocusNode: node => showNode(node),
+});
+
+for (const a of [settingsModal, legendPanelUi, statsModal]) {
+	for (const b of [settingsModal, legendPanelUi, statsModal]) {
+		if (a !== b) a.toggle.addEventListener('click', () => b.close());
+	}
+}
 
 const markerToNode = new WeakMap();
 
@@ -463,29 +488,15 @@ const renderStats = () => {
 	}
 
 	const byType = state.nodesByType;
-	const now = Date.now();
-	const msPerDay = 86400000;
-	const t1 = now - msPerDay;
-	const t7 = now - 7 * msPerDay;
-	const t30 = now - 30 * msPerDay;
-	let c1 = 0, c7 = 0, c30 = 0;
-
-	for (let i = 0; i < nodes.length; i++) {
-		const insertMs = nodes[i].insertDate.getTime();
-		if (insertMs > t1) c1++;
-		if (insertMs > t7) c7++;
-		if (insertMs > t30) c30++;
-	}
 
 	statsCounts.innerHTML = `
 		<span>razem: <b>${nodes.length}</b></span>&nbsp;|
 		<svg class="icon pointer-help"><use href="/assets/icons/icons.svg#icon-user"></use></svg><b>${(byType[1] || []).length}</b>&nbsp;|
 		<svg class="icon icon-filled pointer-help"><use href="/assets/icons/node-types.svg#repeater-plain"></use></svg><b>${(byType[2] || []).length}</b>&nbsp;|
 		<svg class="icon pointer-help"><use href="/assets/icons/icons.svg#icon-users"></use></svg><b>${(byType[3] || []).length}</b>
-		<span class="pointer-help" title="Węzły dodane w ciągu ostatnich 24 godzin">24h: <b>${c1}</b></span>
-		<span class="pointer-help" title="Węzły dodane w ciągu ostatnich 7 dni">7d: <b>${c7}</b></span>
-		<span class="pointer-help" title="Węzły dodane w ciągu ostatnich 30 dni">30d: <b>${c30}</b></span>
 	`;
+
+	statsModal.render();
 };
 
 function renderSearchResults() {
@@ -730,6 +741,23 @@ clusteringZoomInput.addEventListener('input', () => {
 clearFiltersBtn.addEventListener('click', clearFilters);
 
 regionToggle.addEventListener('click', () => setRegion(state.region === 'all' ? 'pl' : 'all'));
+
+let currentBaseMap = baseMapSelected;
+
+const renderBaseMapToggle = () => {
+	const satellite = currentBaseMap === 'Esri Satellite';
+	basemapToggle.classList.toggle('active', satellite);
+	basemapToggle.title = satellite ? 'Przełącz na mapę' : 'Przełącz na widok satelitarny';
+	basemapToggleLabel.textContent = satellite ? 'Satelita' : 'Mapa';
+};
+
+renderBaseMapToggle();
+
+basemapToggle.addEventListener('click', () => {
+	currentBaseMap = currentBaseMap === 'Esri Satellite' ? 'OpenStreetMap' : 'Esri Satellite';
+	setBaseMap(currentBaseMap);
+	renderBaseMapToggle();
+});
 
 document.addEventListener('click', e => {
 	const copyBtn = e.target.closest('.copy-link-btn');
