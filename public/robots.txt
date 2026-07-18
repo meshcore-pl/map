@@ -1,0 +1,7 @@
+User-agent: *
+Disallow: /cdn-cgi
+Disallow: /cdn-cgi/
+Disallow: /.well-known
+Disallow: /.well-known/
+
+Sitemap: https://mapa.meshcorepolska.org/sitemap.xml

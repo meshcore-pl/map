@@ -1,0 +1,178 @@
+<!DOCTYPE html> <!-- Copyright 2026 © by Sefinek. All Rights Reserved. -->
+<html lang="pl">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Mapa węzłów MeshCore Polska</title>
+
+	<!-- Primary meta -->
+	<meta name="description" content="Interaktywna mapa węzłów sieci MeshCore w Polsce i na świecie. Klienci, repeatery, serwery pokoju oraz czujniki na żywo.">
+	<meta name="keywords" content="meshcore, mapa meshcore, meshcore polska, mesh, lora, węzły meshcore, repeater meshcore">
+	<link rel="canonical" href="https://mapa.meshcorepolska.org/">
+	<meta name="theme-color" content="#95010b">
+
+	<!-- Open Graph -->
+	<meta property="og:type" content="website">
+	<meta property="og:site_name" content="Mapa MeshCore Polska">
+	<meta property="og:locale" content="pl_PL">
+	<meta property="og:title" content="Mapa węzłów MeshCore Polska">
+	<meta property="og:description" content="Interaktywna mapa węzłów sieci MeshCore w Polsce i na świecie.">
+	<meta property="og:url" content="https://mapa.meshcorepolska.org/">
+	<meta property="og:image" content="https://meshcorepolska.org/images/brand/banner-og.jpg">
+	<meta property="og:image:width" content="1200">
+	<meta property="og:image:height" content="675">
+	<meta property="og:image:alt" content="MeshCore Polska: ogólnopolska społeczność sieci mesh">
+
+	<!-- Twitter / X Card -->
+	<meta name="twitter:card" content="summary_large_image">
+	<meta name="twitter:title" content="Mapa węzłów MeshCore Polska">
+	<meta name="twitter:description" content="Interaktywna mapa węzłów sieci MeshCore w Polsce i na świecie.">
+	<meta name="twitter:image" content="https://meshcorepolska.org/images/brand/banner-og.jpg">
+	<meta name="twitter:image:alt" content="MeshCore Polska: ogólnopolska społeczność sieci mesh">
+
+	<!-- JavaScript -->
+	<script src="https://cdn.sefinek.net/js/progressbar.js" defer></script>
+
+	<!-- Icons & manifest -->
+	<link rel="icon" href="https://meshcorepolska.org/favicon.ico" sizes="16x16 32x32 48x48 64x64 128x128 256x256">
+	<link rel="icon" href="https://meshcorepolska.org/images/brand/logo-3-192.png" type="image/png" sizes="192x192">
+	<link rel="apple-touch-icon" href="https://meshcorepolska.org/images/brand/logo-3-180.png" sizes="180x180">
+	<link rel="manifest" href="/manifest.json">
+
+	<!-- Stylesheets -->
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,500;0,600;0,700;1,800&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="/vendor/leaflet/leaflet.css">
+	<link rel="stylesheet" href="/vendor/markercluster/MarkerCluster.css">
+	<link rel="stylesheet" href="/vendor/markercluster/MarkerCluster.Default.css">
+	<link rel="stylesheet" href="/assets/css/style.css">
+
+	<!-- schema.org -->
+	<script type="application/ld+json">
+	{
+		"@context": "https://schema.org",
+		"@graph": [
+			{
+				"@type": "WebApplication",
+				"name": "Mapa MeshCore Polska",
+				"description": "Interaktywna mapa węzłów sieci MeshCore w Polsce i na świecie.",
+				"url": "https://mapa.meshcorepolska.org/",
+				"applicationCategory": "UtilitiesApplication",
+				"isPartOf": { "@type": "Organization", "name": "MeshCore Polska", "url": "https://meshcorepolska.org/" }
+			},
+			{
+				"@type": "WebSite",
+				"name": "Mapa MeshCore Polska",
+				"url": "https://mapa.meshcorepolska.org/",
+				"inLanguage": "pl-PL"
+			}
+		]
+	}
+	</script>
+</head>
+<body>
+<main id="map"></main>
+<div id="loading-overlay" role="status" aria-live="polite" aria-label="Ładowanie węzłów" hidden></div>
+
+<header class="stats-bar" id="stats-bar">
+	<a class="brand" href="https://meshcorepolska.org/" target="_blank" rel="noopener" title="MeshCore Polska">
+		<img src="https://meshcorepolska.org/images/brand/logo-3-80.png" alt="" width="34" height="34">
+		<span class="brand-name">MeshCore <strong>Polska</strong></span>
+	</a>
+	<span class="stats-divider"></span>
+	<span id="stats-counts"></span>
+
+	<span class="spacer"></span>
+	<form class="search-inline" id="search-form">
+		<svg class="icon search-icon" aria-hidden="true"><use href="/assets/icons/icons.svg#icon-search"></use></svg>
+		<input type="text" class="text-input" id="search-input" placeholder="Szukaj węzłów" autocomplete="off">
+		<button type="button" class="icon-btn" id="filter-toggle" title="Przełącz filtry">
+			<svg class="icon" aria-hidden="true"><use href="/assets/icons/icons.svg#icon-filter"></use></svg>
+			<span class="filter-active-dot" id="filter-active-dot" hidden></span>
+		</button>
+	</form>
+
+	<span class="spacer"></span>
+	<button type="button" class="region-toggle-btn" id="region-toggle" title="Pokaż wszystkie węzły na świecie">
+		<svg class="icon" aria-hidden="true"><use href="/assets/icons/icons.svg#icon-globe"></use></svg>
+		<span id="region-toggle-label">Tylko Polska</span>
+	</button>
+	<a href="https://github.com/meshcore-pl/mapa.meshcorepolska.org" class="github-link" title="Przejdź do repozytorium GitHub" target="_blank" rel="noopener">
+		<svg class="icon" aria-hidden="true"><use href="/assets/icons/icons.svg#icon-github"></use></svg>
+	</a>
+</header>
+
+<menu class="filters-menu" id="node-filter" hidden>
+	<li>
+		<label class="checkbox-label"><input type="checkbox" class="node-type-checkbox" value="1" checked> Klienci</label>
+	</li>
+	<li>
+		<label class="checkbox-label"><input type="checkbox" class="node-type-checkbox" value="2" checked> Repeatery</label>
+	</li>
+	<li>
+		<label class="checkbox-label"><input type="checkbox" class="node-type-checkbox" value="3" checked> Serwery pokoju</label>
+	</li>
+	<li>
+		<label class="checkbox-label"><input type="checkbox" class="node-type-checkbox" value="4" checked> Czujniki</label>
+	</li>
+	<li class="field-group">
+		<label for="from-date">Ostatnia aktualizacja</label>
+		<input type="date" class="date-input" id="from-date">
+	</li>
+	<li class="field-group">
+		<label for="from-insert-date">Dodano</label>
+		<input type="date" class="date-input" id="from-insert-date">
+	</li>
+	<li class="field-group">
+		<label for="clustering-zoom">Poziom powiększenia grupowania</label>
+		<input type="range" id="clustering-zoom" min="10" max="17" value="12">
+	</li>
+	<li class="field-group" id="freq-filter-group" hidden>
+		<span>Częstotliwość</span>
+		<div id="freq-filter-list"></div>
+	</li>
+	<li>
+		<button type="button" class="clear-filters-btn" id="clear-filters-btn" hidden>Wyczyść filtry</button>
+	</li>
+</menu>
+
+<ul class="search-results" id="search-results" hidden></ul>
+
+<div class="fab-stack">
+	<button type="button" class="fab fab-secondary" id="settings-toggle" title="Ustawienia">
+		<svg class="icon" aria-hidden="true"><use href="/assets/icons/icons.svg#icon-settings"></use></svg>
+	</button>
+	<button type="button" class="fab fab-secondary" id="legend-toggle" title="Legenda mapy">
+		<svg class="icon" aria-hidden="true"><use href="/assets/icons/icons.svg#icon-info"></use></svg>
+	</button>
+	<a class="fab fab-primary" title="Dodaj węzeł do mapy" target="_blank" rel="noopener" href="https://github.com/meshcore-dev/MeshCore/blob/main/docs/faq.md#512-q-how-do-i-add-a-node-to-the-meshcore-map">
+		<svg class="icon" aria-hidden="true"><use href="/assets/icons/icons.svg#icon-plus"></use></svg>
+	</a>
+</div>
+
+<div class="settings-panel" id="settings-panel" hidden>
+	<div class="legend-title">Ustawienia</div>
+	<p class="settings-placeholder">Wkrótce pojawią się tutaj opcje.</p>
+</div>
+
+<div class="legend-panel" id="legend-panel" hidden>
+	<div class="legend-title">Typ węzła</div>
+	<div class="legend-row"><img class="legend-icon" src="/assets/img/node_types/1.svg" alt="" width="20" height="20"><span>Klient</span></div>
+	<div class="legend-row"><img class="legend-icon" src="/assets/img/node_types/2.svg" alt="" width="20" height="20"><span>Repeater</span></div>
+	<div class="legend-row"><img class="legend-icon" src="/assets/img/node_types/3.svg" alt="" width="20" height="20"><span>Serwer pokoju</span></div>
+	<div class="legend-row"><img class="legend-icon" src="/assets/img/node_types/4.svg" alt="" width="20" height="20"><span>Czujnik</span></div>
+
+	<div class="legend-title">Aktualność</div>
+	<div class="legend-row"><img class="legend-icon update-recent" src="/assets/img/node_types/1.svg" alt="" width="20" height="20"><span>Zaktualizowano niedawno</span></div>
+	<div class="legend-row"><img class="legend-icon update-stale" src="/assets/img/node_types/1.svg" alt="" width="20" height="20"><span>Zaktualizowano jakiś czas temu</span></div>
+	<div class="legend-row"><img class="legend-icon update-old" src="/assets/img/node_types/1.svg" alt="" width="20" height="20"><span>Dawno nieaktualizowany</span></div>
+	<div class="legend-row"><img class="legend-icon update-extinct" src="/assets/img/node_types/1.svg" alt="" width="20" height="20"><span>Zostanie wkrótce usunięty</span></div>
+	<div class="legend-row"><img class="legend-icon" src="/assets/img/node_types/1.svg" alt="" width="20" height="20"><span>Dodano ręcznie</span></div>
+</div>
+
+<script src="/vendor/leaflet/leaflet.js"></script>
+<script src="/vendor/markercluster/leaflet.markercluster.js"></script>
+<script src="/assets/js/map.js" type="module"></script>
+</body>
+</html>
