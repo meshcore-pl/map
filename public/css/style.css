@@ -15,6 +15,8 @@
 	--blue-bright: #4dabf7;
 	--blue-light: #7cc4f7;
 	--blue-dark: #2f8fd1;
+	--green-bright: #2dd881;
+	--amber-bright: #f2b134;
 	--radius: 12px;
 	--radius-sm: 8px;
 	--shadow: 0 0 28px rgba(0, 0, 0, 0.4);
@@ -878,21 +880,124 @@ a:active {
 	border: none !important;
 }
 
+.node-header {
+	display: flex;
+	align-items: center;
+	gap: 14px;
+	margin-bottom: 14px;
+}
+
 .node-qr {
 	display: flex;
 	justify-content: center;
 	align-items: center;
+	flex-shrink: 0;
 	width: fit-content;
-	margin: 0 auto 14px;
-	padding: 10px;
+	padding: 7px;
 	line-height: 0;
 	background: #fff;
 	border-radius: 10px;
 }
 
 .node-qr canvas, .node-qr img {
-	width: 150px !important;
-	height: 150px !important;
+	width: 96px !important;
+	height: 96px !important;
+}
+
+.node-header-info {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	min-width: 0;
+}
+
+.node-title {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+}
+
+.node-title-text {
+	font-size: 1.1rem;
+	font-weight: 700;
+	color: var(--text);
+	overflow-wrap: anywhere;
+}
+
+.node-badges {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+}
+
+.badge {
+	display: inline-flex;
+	align-items: center;
+	padding: 3px 10px;
+	border-radius: 999px;
+	font-size: 0.72rem;
+	font-weight: 600;
+	border: 1px solid var(--border-strong);
+	background: var(--bg-panel-hover);
+	color: var(--text-muted);
+	white-space: nowrap;
+}
+
+.badge-type {
+	color: var(--text);
+}
+
+.badge-dot {
+	width: 7px;
+	height: 7px;
+	flex-shrink: 0;
+	margin-right: 5px;
+	border-radius: 50%;
+	background: currentColor;
+}
+
+.badge-status-none {
+	color: var(--blue-bright);
+}
+
+.badge-status-recent {
+	color: var(--green-bright);
+}
+
+.badge-status-stale {
+	color: var(--amber-bright);
+}
+
+.badge-status-old {
+	color: var(--text-muted);
+}
+
+.badge-status-extinct {
+	color: var(--red-bright);
+}
+
+.node-info-full {
+	padding-top: 6px !important;
+}
+
+.param-chips {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 5px;
+	margin-top: 4px;
+}
+
+.param-chip {
+	display: inline-flex;
+	align-items: center;
+	padding: 2px 7px;
+	border-radius: 6px;
+	background: var(--bg-panel-hover);
+	border: 1px solid var(--border);
+	font-family: var(--font-mono);
+	font-size: 0.72rem;
+	color: var(--text);
+	cursor: help;
 }
 
 table.node-info {
@@ -1007,7 +1112,7 @@ time {
 	border-top: 1px solid var(--border);
 }
 
-.user-actions-right {
+.user-actions-left, .user-actions-right {
 	display: flex;
 	align-items: center;
 	gap: 15px;

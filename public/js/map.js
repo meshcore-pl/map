@@ -71,22 +71,35 @@ const radioParamDesc = {
 	'bw': {
 		label: 'Szerokość pasma',
 		unit: 'kHz',
+		short: '',
 	},
 	'freq': {
 		label: 'Częstotliwość',
 		unit: 'MHz',
+		short: '',
 	},
 	'sf': {
 		label: 'Współczynnik rozproszenia',
 		unit: '',
+		short: 'SF',
 	},
 	'cr': {
 		label: 'Współczynnik kodowania',
 		unit: '',
+		short: 'CR',
 	},
 };
 
-const columnOrder = ['adv_name', 'public_key', 'type', 'status', 'link', 'inserted_date', 'updated_date', 'coords', 'preset', 'params'];
+const statusBadgeClass = {
+	'none': 'badge-status-none',
+	'recent': 'badge-status-recent',
+	'stale': 'badge-status-stale',
+	'old': 'badge-status-old',
+	'extinct': 'badge-status-extinct',
+};
+
+const columnOrder = ['public_key', 'link', 'inserted_date', 'updated_date', 'coords', 'preset', 'params'];
+const paramOrder = ['freq', 'bw', 'sf', 'cr'];
 
 const pluralPl = (count, [one, few, many]) => {
 	if (count === 1) return one;
@@ -144,14 +157,6 @@ const columns = {
 			'Kopiuj współrzędne'
 		),
 	},
-	adv_name: {
-		label: 'Nazwa',
-		value: val => withCopyButton(escapeHtml(val), val, 'Kopiuj nazwę'),
-	},
-	status: {
-		label: 'Aktualność',
-		value: val => updateStatusDesc[val],
-	},
 	inserted_date: {
 		label: 'Dodano',
 		value: val => {
@@ -175,10 +180,6 @@ const columns = {
 			escapeHtml(val)
 		),
 	},
-	type: {
-		label: 'Typ',
-		value: val => types[val],
-	},
 	preset: {
 		label: 'Preset radiowy',
 		value: val => {
@@ -188,10 +189,11 @@ const columns = {
 	},
 	params: {
 		label: 'Parametry radiowe',
-		value: val => Object.entries(val).map(([key, paramVal]) => {
+		value: val => `<span class="param-chips">${paramOrder.filter(key => key in val).map(key => {
 			const paramKey = radioParamDesc[key];
-			return escapeHtml(`${paramKey.label}: ${paramVal}${paramKey.unit}`);
-		}).join('<br>'),
+			const text = `${paramKey.short}${val[key]}${paramKey.unit}`;
+			return `<span class="param-chip" title="${escapeHtml(paramKey.label)}">${escapeHtml(text)}</span>`;
+		}).join('')}</span>`,
 	},
 	link: {
 		label: 'Link Meshcore',
@@ -251,9 +253,9 @@ const getNodeInfoText = node => {
 		const preset = findPreset(node.params);
 		lines.push(`- **Preset radiowy:** ${preset.params?.freq ? preset.name : 'Niestandardowy'}`);
 		lines.push('- **Ustawienia:**');
-		for (const [key, paramVal] of Object.entries(node.params)) {
+		for (const key of paramOrder.filter(k => k in node.params)) {
 			const paramKey = radioParamDesc[key];
-			lines.push(`  - ${paramKey.label}: ${paramVal}${paramKey.unit}`);
+			lines.push(`  - ${paramKey.label}: ${node.params[key]}${paramKey.unit}`);
 		}
 	}
 
@@ -270,12 +272,31 @@ const getNodePopupHTML = node => {
 		type: node.type,
 	});
 	const qrValue = `meshcore://contact/add?${contactParams.toString()}`;
+	const statusClass = statusBadgeClass[node.status] || '';
+	const shareUrl = `${location.origin}${location.pathname}?node=${node.public_key}`;
 
 	return `
-		<div class="node-qr" data-qr-value="${escapeHtml(qrValue)}"></div>
+		<div class="node-header">
+			<div class="node-qr" data-qr-value="${escapeHtml(qrValue)}"></div>
+			<div class="node-header-info">
+				<div class="node-title">
+					<span class="node-title-text">${escapeHtml(node.adv_name)}</span>
+					<button type="button" class="copy-icon-btn" title="Kopiuj nazwę" data-copy-value="${escapeHtml(node.adv_name)}">
+						<svg class="icon" aria-hidden="true"><use href="/icons/icons.svg#copy"></use></svg>
+					</button>
+				</div>
+				<div class="node-badges">
+					<span class="badge badge-type">${types[node.type]}</span>
+					${node.status ? `<span class="badge ${statusClass}"><span class="badge-dot"></span>${updateStatusDesc[node.status]}</span>` : ''}
+				</div>
+			</div>
+		</div>
 		${getTable(node)}
 		<div class="user-actions">
-			<button type="button" class="copy-link-btn" data-copy-value="${escapeHtml(getNodeInfoText(node))}">Skopiuj informacje</button>
+			<div class="user-actions-left">
+				<button type="button" class="copy-link-btn" data-copy-value="${escapeHtml(shareUrl)}">Udostępnij</button>
+				<button type="button" class="copy-link-btn" data-copy-value="${escapeHtml(getNodeInfoText(node))}">Skopiuj informacje</button>
+			</div>
 			<div class="user-actions-right">
 				<a href="${getDeletionMailUrl(node)}" target="_blank">Zgłoś usunięcie węzła</a>
 				${userActionAnchor}
@@ -455,7 +476,7 @@ const ensurePopup = marker => {
 
 	const node = markerToNode.get(marker);
 	if (node) {
-		marker.bindPopup(L.popup({ minWidth: 390, maxWidth: 390, content: () => getNodePopupHTML(node) }));
+		marker.bindPopup(L.popup({ minWidth: 410, maxWidth: 410, content: () => getNodePopupHTML(node) }));
 		marker._popupBound = true;
 	}
 };
@@ -601,9 +622,9 @@ const renderStats = () => {
 
 	statsCounts.innerHTML = `
 		<span class="pointer-help" title="Łączna liczba wszystkich węzłów">razem: <b>${nodes.length}</b></span>&nbsp;|
-		<svg class="icon pointer-help" title="Łączna liczba klientów"><use href="/icons/icons.svg#user"></use></svg><b>${(byType[1] || []).length}</b>&nbsp;|
-		<svg class="icon icon-filled pointer-help" title="Łączna liczba repeaterów"><use href="/icons/node-types.svg#repeater-plain"></use></svg><b>${(byType[2] || []).length}</b>&nbsp;|
-		<svg class="icon pointer-help" title="Łączna liczba serwerów pokoju"><use href="/icons/icons.svg#message"></use></svg><b>${(byType[3] || []).length}</b>
+		<svg class="icon pointer-help"><title>Łączna liczba klientów</title><use href="/icons/icons.svg#user"></use></svg><b>${(byType[1] || []).length}</b>&nbsp;|
+		<svg class="icon icon-filled pointer-help"><title>Łączna liczba repeaterów</title><use href="/icons/node-types.svg#repeater-plain"></use></svg><b>${(byType[2] || []).length}</b>&nbsp;|
+		<svg class="icon pointer-help"><title>Łączna liczba serwerów pokoju</title><use href="/icons/icons.svg#message"></use></svg><b>${(byType[3] || []).length}</b>
 	`;
 
 	statsModal.render();
@@ -870,8 +891,7 @@ const downloadNodes = async region => {
 		setLoadingProgress('presets', 0);
 		try {
 			await presetsPromise;
-		}
-		catch (err) {
+		} catch (err) {
 			if (err.name === 'AbortError') throw err;
 			console.error('Nie udało się pobrać presetów radiowych:', err);
 		}
@@ -1060,6 +1080,11 @@ downloadNodes(state.region).then(() => {
 		renderFreqFilters();
 	}
 	applyFilters({ silent: true });
+
+	if (urlParams.node) {
+		const node = state.nodes.find(n => n.public_key === urlParams.node);
+		if (node) showNode(node);
+	}
 });
 
 window.refreshMap = refreshMap;
