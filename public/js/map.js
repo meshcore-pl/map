@@ -430,6 +430,7 @@ const regionToggleLabel = document.getElementById('region-toggle-label');
 const basemapToggle = document.getElementById('basemap-toggle');
 const basemapMenu = document.getElementById('basemap-menu');
 const settingsModal = initModal('settings-toggle', 'settings-overlay');
+const closeFiltersOnApplyCheckbox = document.getElementById('setting-close-filters-on-apply');
 const legendPanelUi = initLegendPanel();
 const searchInline = document.getElementById('search-form');
 const searchInput = document.getElementById('search-input');
@@ -443,6 +444,7 @@ const clusteringZoomInput = document.getElementById('clustering-zoom');
 const freqFilterGroup = document.getElementById('freq-filter-group');
 const freqFilterList = document.getElementById('freq-filter-list');
 const clearFiltersBtn = document.getElementById('clear-filters-btn');
+const applyFiltersBtn = document.getElementById('apply-filters-btn');
 const nodeTypeCheckboxes = [...document.querySelectorAll('.node-type-checkbox')];
 const legendUpdatedAtEl = document.getElementById('legend-updated-at');
 
@@ -454,6 +456,8 @@ const state = {
 	nodeFilter: ['1', '2', '3', '4'],
 	freqFilter: [],
 	availableFreqs: [],
+	hasUnknownFreq: false,
+	includeUnknownFreq: true,
 	fromDate: '',
 	fromInsertDate: '',
 	clusteringZoom: 11,
@@ -556,7 +560,7 @@ const positionDropdown = (el, anchor = searchInline, { fullWidthOnMobile = true 
 
 const refreshMap = ({ clusteringZoom = 0 } = {}) => {
 	markerClusterGroup.clearLayers();
-	const nodes = state.filteredNodes.length > 0 ? state.filteredNodes : state.nodes;
+	const nodes = state.filteredNodes;
 
 	map.removeLayer(markerClusterGroup);
 
@@ -603,11 +607,6 @@ const syncUrlParams = () => {
 		lat: map.getCenter().lat.toFixed(4),
 		lon: map.getCenter().lng.toFixed(4),
 		zoom: map.getZoom(),
-		nodes: state.nodeFilter.join(','),
-		freq: state.freqFilter.join(','),
-		date: state.fromDate,
-		dateInsert: state.fromInsertDate,
-		cluster: state.clusteringZoom,
 	};
 
 	history.replaceState({}, '', `/?${new URLSearchParams(params)}`);
@@ -621,26 +620,31 @@ const updateRegionToggleUI = () => {
 };
 
 const updateFiltersActiveUI = () => {
-	const active = state.filteredNodes.length > 0 && state.nodes.length !== state.filteredNodes.length;
+	const active = state.nodes.length !== state.filteredNodes.length;
 	filterToggle.classList.toggle('active', active);
 	filterActiveDot.hidden = !active;
 	clearFiltersBtn.hidden = !active;
 };
 
 const renderStats = () => {
-	const nodes = state.nodes;
-	if (!nodes.length) {
+	if (!state.nodes.length) {
 		statsCounts.innerHTML = '';
 		return;
 	}
 
-	const byType = state.nodesByType;
+	const nodes = state.filteredNodes;
+	let clients = 0, repeaters = 0, roomServers = 0;
+	for (const node of nodes) {
+		if (node.type === 1) clients++;
+		else if (node.type === 2) repeaters++;
+		else if (node.type === 3) roomServers++;
+	}
 
 	statsCounts.innerHTML = `
-		<span class="pointer-help" title="Łączna liczba wszystkich węzłów">razem: <b>${nodes.length}</b></span>&nbsp;|
-		<svg class="icon pointer-help"><title>Łączna liczba klientów</title><use href="/icons/icons.svg#user"></use></svg><b>${(byType[1] || []).length}</b>&nbsp;|
-		<svg class="icon icon-filled pointer-help"><title>Łączna liczba repeaterów</title><use href="/icons/node-types.svg#repeater-plain"></use></svg><b>${(byType[2] || []).length}</b>&nbsp;|
-		<svg class="icon pointer-help"><title>Łączna liczba serwerów pokoju</title><use href="/icons/icons.svg#message"></use></svg><b>${(byType[3] || []).length}</b>`;
+		<span class="pointer-help" title="Łączna liczba węzłów spełniających filtry">razem: <b>${nodes.length}</b></span>&nbsp;|
+		<svg class="icon pointer-help"><title>Liczba klientów spełniających filtry</title><use href="/icons/icons.svg#user"></use></svg><b>${clients}</b>&nbsp;|
+		<svg class="icon icon-filled pointer-help"><title>Liczba repeaterów spełniających filtry</title><use href="/icons/node-types.svg#repeater-plain"></use></svg><b>${repeaters}</b>&nbsp;|
+		<svg class="icon pointer-help"><title>Liczba serwerów pokoju spełniających filtry</title><use href="/icons/icons.svg#message"></use></svg><b>${roomServers}</b>`;
 
 	statsModal.render();
 };
@@ -663,7 +667,7 @@ function renderSearchResults() {
 		return;
 	}
 
-	const nodes = state.filteredNodes.length > 0 ? state.filteredNodes : state.nodes;
+	const nodes = state.filteredNodes;
 	searchResults = nodes.filter(
 		node => node.adv_name.toLowerCase().includes(state.search.toLowerCase()) || node.public_key.startsWith(state.search)
 	).toSorted(
@@ -694,8 +698,7 @@ const runFilterPass = () => {
 	const fromDate = new Date(state.fromDate);
 	const fromInsertDate = new Date(state.fromInsertDate);
 	const byType = state.nodesByType;
-	const hasFreqFilter = state.freqFilter.length > 0;
-	const freqSet = hasFreqFilter ? new Set(state.freqFilter) : null;
+	const freqSet = new Set(state.freqFilter);
 
 	const result = [];
 	for (const type of state.nodeFilter) {
@@ -706,7 +709,7 @@ const runFilterPass = () => {
 			const node = typeNodes[i];
 			if (node.updatedDate ? node.updatedDate <= fromDate : node.insertDate <= fromDate) continue;
 			if (node.insertDate <= fromInsertDate) continue;
-			if (hasFreqFilter && !(node.params?.freq && freqSet.has(Math.floor(node.params.freq)))) continue;
+			if (node.params?.freq ? !freqSet.has(Math.floor(node.params.freq)) : !state.includeUnknownFreq) continue;
 			result.push(node);
 		}
 	}
@@ -716,6 +719,7 @@ const runFilterPass = () => {
 	syncUrlParams();
 	updateFiltersActiveUI();
 	renderSearchResults();
+	renderStats();
 };
 
 let filterToast = null;
@@ -743,19 +747,29 @@ const applyFilters = ({ silent = false } = {}) => {
 
 const onFreqFilterChange = () => {
 	state.freqFilter = [...freqFilterList.querySelectorAll('.freq-checkbox:checked')].map(cb => Number(cb.value));
-	applyFilters();
+	state.includeUnknownFreq = freqFilterList.querySelector('.freq-unknown-checkbox')?.checked ?? true;
 };
 
 const renderFreqFilters = () => {
-	freqFilterGroup.hidden = state.availableFreqs.length === 0;
+	if (state.freqFilter.length === 0) state.freqFilter = [...state.availableFreqs];
+
+	freqFilterGroup.hidden = state.availableFreqs.length === 0 && !state.hasUnknownFreq;
+
+	const unknownCheckboxHtml = state.hasUnknownFreq ? `
+		<label class="checkbox-label">
+			<input type="checkbox" class="freq-unknown-checkbox" ${state.includeUnknownFreq ? 'checked' : ''}>
+			Nieznana
+		</label>
+	` : '';
+
 	freqFilterList.innerHTML = state.availableFreqs.map(freq => `
 		<label class="checkbox-label">
 			<input type="checkbox" class="freq-checkbox" value="${freq}" ${state.freqFilter.includes(freq) ? 'checked' : ''}>
 			${freq} MHz
 		</label>
-	`).join('');
+	`).join('') + unknownCheckboxHtml;
 
-	freqFilterList.querySelectorAll('.freq-checkbox').forEach(checkbox => {
+	freqFilterList.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
 		checkbox.addEventListener('change', onFreqFilterChange);
 	});
 };
@@ -763,6 +777,7 @@ const renderFreqFilters = () => {
 const clearFilters = () => {
 	state.nodeFilter = ['1', '2', '3', '4'];
 	state.freqFilter = [];
+	state.includeUnknownFreq = true;
 	state.fromDate = '2025-03-01';
 	state.fromInsertDate = '2025-03-01';
 	state.clusteringZoom = 11;
@@ -799,7 +814,7 @@ const applyDownloadedNodes = cached => {
 	state.nodesByType = cached.byType;
 	state.nodes = cached.nodes;
 	state.availableFreqs = cached.availableFreqs;
-	renderStats();
+	state.hasUnknownFreq = cached.hasUnknownFreq;
 	renderFreqFilters();
 	renderLegendUpdatedAt(cached.dataUpdatedAt);
 };
@@ -885,6 +900,7 @@ const downloadNodes = async region => {
 
 		const byType = {};
 		const freqSet = new Set();
+		let hasUnknownFreq = false;
 		const CHUNK_SIZE = 2000;
 
 		for (let offset = 0; offset < nodes.length; offset += CHUNK_SIZE) {
@@ -922,6 +938,7 @@ const downloadNodes = async region => {
 				markerToNode.set(marker, node);
 
 				if (node.params?.freq) freqSet.add(Math.floor(node.params.freq));
+				else hasUnknownFreq = true;
 			}
 		}
 
@@ -939,7 +956,7 @@ const downloadNodes = async region => {
 
 		setLoadingStatus('Gotowe.');
 
-		nodesCache[region] = { nodes, byType, availableFreqs: [...freqSet].sort((a, b) => a - b), dataUpdatedAt };
+		nodesCache[region] = { nodes, byType, availableFreqs: [...freqSet].sort((a, b) => a - b), hasUnknownFreq, dataUpdatedAt };
 		applyDownloadedNodes(nodesCache[region]);
 	} catch (err) {
 		if (err.name !== 'AbortError') {
@@ -1015,24 +1032,32 @@ filterToggle.addEventListener('click', () => {
 nodeTypeCheckboxes.forEach(checkbox => {
 	checkbox.addEventListener('change', () => {
 		state.nodeFilter = nodeTypeCheckboxes.filter(cb => cb.checked).map(cb => cb.value);
-		applyFilters();
 	});
 });
 
 fromDateInput.addEventListener('change', () => {
 	state.fromDate = fromDateInput.value;
-	applyFilters();
 });
 
 fromInsertDateInput.addEventListener('change', () => {
 	state.fromInsertDate = fromInsertDateInput.value;
-	applyFilters();
 });
 
 clusteringZoomInput.addEventListener('input', () => {
 	state.clusteringZoom = Number(clusteringZoomInput.value);
 	refreshMap({ clusteringZoom: state.clusteringZoom });
 	syncUrlParams();
+});
+
+closeFiltersOnApplyCheckbox.checked = localStorage.getItem('closeFiltersOnApply') !== '0';
+
+closeFiltersOnApplyCheckbox.addEventListener('change', () => {
+	localStorage.setItem('closeFiltersOnApply', closeFiltersOnApplyCheckbox.checked ? '1' : '0');
+});
+
+applyFiltersBtn.addEventListener('click', () => {
+	applyFilters();
+	if (closeFiltersOnApplyCheckbox.checked) filterMenu.hidden = true;
 });
 
 clearFiltersBtn.addEventListener('click', clearFilters);
@@ -1137,30 +1162,9 @@ window.addEventListener('resize', () => {
 
 map.on('moveend', syncUrlParams);
 
-if (urlParams.nodes) {
-	state.nodeFilter = urlParams.nodes.split(',');
-	nodeTypeCheckboxes.forEach(cb => { cb.checked = state.nodeFilter.includes(cb.value); });
-}
-if (urlParams.date) {
-	state.fromDate = urlParams.date;
-	fromDateInput.value = state.fromDate;
-}
-if (urlParams.dateInsert) {
-	state.fromInsertDate = urlParams.dateInsert;
-	fromInsertDateInput.value = state.fromInsertDate;
-}
-if (urlParams.cluster) {
-	state.clusteringZoom = Number(urlParams.cluster);
-	clusteringZoomInput.value = state.clusteringZoom;
-}
-
 updateRegionToggleUI();
 
 downloadNodes(state.region).then(() => {
-	if (urlParams.freq) {
-		state.freqFilter = urlParams.freq.split(',').map(Number);
-		renderFreqFilters();
-	}
 	applyFilters({ silent: true });
 
 	if (urlParams.node) {

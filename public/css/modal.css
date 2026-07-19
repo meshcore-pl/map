@@ -52,12 +52,6 @@
 	}
 }
 
-.settings-placeholder {
-	margin: 0;
-	font-size: 0.85rem;
-	color: var(--text-muted);
-}
-
 .region-warning-panel {
 	max-width: 460px;
 	gap: 14px;
