@@ -329,29 +329,34 @@ const getPresets = async signal => {
 	return presets;
 };
 
+const OPENFREEMAP_NAME = 'OpenFreeMap';
+
 const baseMaps = {
 	'CartoDB Dark': L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
 		maxZoom: 20,
 		subdomains: 'abcd',
-		attribution: 'Kafelki: &copy; <a href="https://carto.com/attributions">CARTO</a>',
 	}),
 	'OpenStreetMap': L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
 		maxZoom: 19,
-		attribution: 'Kafelki: &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
 	}),
 	'Esri Satellite': L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
 		maxZoom: 18,
-		attribution: 'Kafelki: &copy; Esri',
 	}),
 	'OpenTopoMap': L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
 		maxZoom: 17,
 		subdomains: 'abc',
-		attribution: 'Kafelki: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (CC-BY-SA)',
 	}),
 };
 
+const baseMapAttributions = {
+	'CartoDB Dark': 'Kafelki: &copy; <a href="https://carto.com/attributions">CARTO</a>',
+	'OpenStreetMap': 'Kafelki: &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+	'Esri Satellite': 'Kafelki: &copy; Esri',
+	'OpenTopoMap': 'Kafelki: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (CC-BY-SA)',
+	[OPENFREEMAP_NAME]: 'Kafelki: &copy; <a href="https://openfreemap.org">OpenFreeMap</a> &copy; <a href="https://www.openmaptiles.org/">OpenMapTiles</a> Dane: &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+};
+
 const baseMapOrder = ['CartoDB Dark', 'OpenStreetMap', 'Esri Satellite', 'OpenTopoMap'];
-const OPENFREEMAP_NAME = 'OpenFreeMap';
 
 let showOpenFreeMap = localStorage.getItem('showOpenFreeMap') === '1';
 const getBaseMapOrder = () => showOpenFreeMap ? [...baseMapOrder, OPENFREEMAP_NAME] : baseMapOrder;
@@ -426,13 +431,14 @@ const getOpenFreeMapLayer = async () => {
 		await loadMaplibreGL();
 		baseMaps[OPENFREEMAP_NAME] = L.maplibreGL({
 			style: 'https://tiles.openfreemap.org/styles/liberty',
-			attribution: 'Kafelki: &copy; <a href="https://openfreemap.org">OpenFreeMap</a> &copy; <a href="https://www.openmaptiles.org/">OpenMapTiles</a> Dane: &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+			attributionControl: false,
 		});
 	}
 	return baseMaps[OPENFREEMAP_NAME];
 };
 
 let baseMapRequestId = 0;
+let currentBaseMapAttribution = null;
 const setBaseMap = async name => {
 	const requestId = ++baseMapRequestId;
 	const targetLayer = name === OPENFREEMAP_NAME ? await getOpenFreeMapLayer() : baseMaps[name];
@@ -444,13 +450,16 @@ const setBaseMap = async name => {
 	}
 	if (!map.hasLayer(targetLayer)) map.addLayer(targetLayer);
 
+	if (currentBaseMapAttribution) map.attributionControl.removeAttribution(currentBaseMapAttribution);
+	currentBaseMapAttribution = baseMapAttributions[name];
+	map.attributionControl.addAttribution(currentBaseMapAttribution);
+
 	localStorage.setItem('baseMapSelected', name);
 };
 
 void setBaseMap(baseMapSelected).catch(err => {
 	console.error('Nie udało się ustawić mapy bazowej:', err);
-	const fallback = baseMaps[baseMapOrder[0]];
-	if (!map.hasLayer(fallback)) map.addLayer(fallback);
+	void setBaseMap(baseMapOrder[0]);
 });
 
 const nodeTypeIconNames = { 1: 'client', 2: 'repeater', 3: 'room-server', 4: 'sensor' };
