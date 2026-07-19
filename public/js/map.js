@@ -444,7 +444,7 @@ const state = {
 	availableFreqs: [],
 	fromDate: '',
 	fromInsertDate: '',
-	clusteringZoom: 12,
+	clusteringZoom: 11,
 	nodes: [],
 	nodesByType: {},
 	filteredNodes: [],
@@ -753,7 +753,7 @@ const clearFilters = () => {
 	state.freqFilter = [];
 	state.fromDate = '2025-03-01';
 	state.fromInsertDate = '2025-03-01';
-	state.clusteringZoom = 12;
+	state.clusteringZoom = 11;
 
 	nodeTypeCheckboxes.forEach(cb => { cb.checked = true; });
 	fromDateInput.value = state.fromDate;
