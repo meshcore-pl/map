@@ -822,6 +822,19 @@ const downloadNodes = async region => {
 
 		setLoadingStatus('Łączenie z serwerem...');
 		const nodesReq = await fetch(apiUrl(region), { signal: abortController.signal });
+
+		if (!nodesReq.ok) {
+			let message = `Serwer zwrócił błąd ${nodesReq.status}`;
+			try {
+				const body = await nodesReq.json();
+				if (body?.message) message = body.message;
+			} catch { /* response body wasn't JSON, keep the generic message */ }
+
+			const apiErr = new Error(message);
+			apiErr.isApiError = true;
+			throw apiErr;
+		}
+
 		const dataUpdatedAt = nodesReq.headers.get('X-Data-Updated');
 		const totalBytes = Number(nodesReq.headers.get('Content-Length')) || 0;
 		setLoadingProgress('connect');
@@ -921,7 +934,8 @@ const downloadNodes = async region => {
 	}
 	catch (e) {
 		if (e.name !== 'AbortError') {
-			alert('Wystąpił nieoczekiwany błąd podczas wczytywania danych. Spróbuj ponownie.');
+			const message = e.isApiError ? e.message : 'Wystąpił nieoczekiwany błąd podczas wczytywania danych. Spróbuj ponownie.';
+			showToast(message, { status: 'error', duration: 6000 });
 			console.error(e);
 		}
 	}
