@@ -179,6 +179,23 @@ a:active {
 	text-align: center;
 }
 
+.loading-cancel-btn {
+	font: inherit;
+	font-weight: 500;
+	font-size: 0.85rem;
+	padding: 8px 20px;
+	border: 1px solid var(--red-dark);
+	border-radius: var(--radius-sm);
+	background: transparent;
+	color: var(--red-bright);
+	cursor: pointer;
+	transition: background-color 0.15s ease;
+}
+
+.loading-cancel-btn:hover {
+	background: var(--red-glow);
+}
+
 #map {
 	height: 100vh;
 	background: #0a0c11;

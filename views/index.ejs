@@ -83,6 +83,7 @@
 		<div class="loading-status" id="loading-status"></div>
 		<div class="loading-progress"><div class="loading-progress-bar" id="loading-progress-bar"></div></div>
 		<div class="loading-meta" id="loading-meta"></div>
+		<button type="button" class="loading-cancel-btn" id="loading-cancel-btn">Anuluj</button>
 	</div>
 </div>
 
@@ -167,6 +168,24 @@
 	<a class="fab fab-primary" title="Dodaj węzeł do mapy" target="_blank" rel="noopener" href="https://github.com/meshcore-dev/MeshCore/blob/main/docs/faq.md#512-q-how-do-i-add-a-node-to-the-meshcore-map">
 		<svg class="icon" aria-hidden="true"><use href="/icons/icons.svg#plus"></use></svg>
 	</a>
+</div>
+
+<div class="modal-overlay" id="region-warning-overlay" hidden>
+	<div class="settings-panel region-warning-panel" id="region-warning-panel" role="dialog" aria-modal="true" aria-labelledby="region-warning-title">
+		<div class="region-warning-header">
+			<span class="region-warning-icon"><svg class="icon" aria-hidden="true"><use href="/icons/icons.svg#warning"></use></svg></span>
+			<div class="region-warning-title" id="region-warning-title">Jesteś tego pewny?</div>
+		</div>
+		<p class="region-warning-text">
+			Węzły z całego świata ważą <span id="region-warning-size">nieznany rozmiar</span> danych. Sporo więcej niż tylko te z Polski.
+			Jeśli korzystasz z limitowanego pakietu danych od swojego operatora (ISP), pobranie ich może wykorzystać znaczną część tego ograniczenia.
+			Duża ilość danych może też mocno obciążyć wolniejsze łącza oraz starsze lub mniej wydajne urządzenia.
+		</p>
+		<div class="region-warning-actions">
+			<button type="button" class="region-warning-btn" id="region-warning-cancel">Anuluj</button>
+			<button type="button" class="region-warning-btn region-warning-btn-primary" id="region-warning-confirm">Pobierz mimo to</button>
+		</div>
+	</div>
 </div>
 
 <div class="modal-overlay" id="settings-overlay" hidden>

@@ -282,10 +282,10 @@ const getNodePopupHTML = node => {
 		</div>`;
 };
 
-const getPresets = async () => {
+const getPresets = async signal => {
 	if (presets.length) return presets;
 
-	const res = await fetch('https://api.meshcore.nz/api/v1/config');
+	const res = await fetch('https://api.meshcore.nz/api/v1/config', { signal });
 	const presetsApi = (await res.json()).config.suggested_radio_settings.entries;
 
 	presets = presetsApi.map(p => ({
@@ -389,6 +389,11 @@ const loadingOverlay = document.getElementById('loading-overlay');
 const loadingStatus = document.getElementById('loading-status');
 const loadingProgressBar = document.getElementById('loading-progress-bar');
 const loadingMeta = document.getElementById('loading-meta');
+const loadingCancelBtn = document.getElementById('loading-cancel-btn');
+const regionWarningOverlay = document.getElementById('region-warning-overlay');
+const regionWarningConfirmBtn = document.getElementById('region-warning-confirm');
+const regionWarningCancelBtn = document.getElementById('region-warning-cancel');
+const regionWarningSizeEl = document.getElementById('region-warning-size');
 const statsCounts = document.getElementById('stats-counts');
 const regionToggle = document.getElementById('region-toggle');
 const regionToggleLabel = document.getElementById('region-toggle-label');
@@ -411,9 +416,11 @@ const clearFiltersBtn = document.getElementById('clear-filters-btn');
 const nodeTypeCheckboxes = [...document.querySelectorAll('.node-type-checkbox')];
 const legendUpdatedAtEl = document.getElementById('legend-updated-at');
 
+const storedRegion = localStorage.getItem('regionSelected');
+
 const state = {
 	search: '',
-	region: urlParams.region === 'all' ? 'all' : 'pl',
+	region: storedRegion === 'all' ? 'all' : 'pl',
 	nodeFilter: ['1', '2', '3', '4'],
 	freqFilter: [],
 	availableFreqs: [],
@@ -468,6 +475,14 @@ const attachClusterClickHandler = group => {
 
 attachClusterClickHandler(markerClusterGroup);
 
+const LOADING_PHASES = {
+	connect: { from: 0, to: 5 },
+	download: { from: 5, to: 55 },
+	unpack: { from: 55, to: 60 },
+	process: { from: 60, to: 90 },
+	presets: { from: 90, to: 100 },
+};
+
 const setLoading = loading => {
 	loadingOverlay.hidden = !loading;
 	if (loading) {
@@ -481,16 +496,16 @@ const setLoadingStatus = text => {
 	loadingStatus.textContent = text;
 };
 
-const renderLoadingProgress = (receivedBytes, totalBytes, elapsedSec) => {
-	const speed = elapsedSec > 0 ? receivedBytes / elapsedSec : 0;
-	const speedText = `${ntools.formatBytes(speed)}/s`;
+const setLoadingProgress = (phase, fraction = 1) => {
+	const { from, to } = LOADING_PHASES[phase];
+	const pct = from + (to - from) * Math.min(1, Math.max(0, fraction));
+	loadingProgressBar.style.width = `${pct}%`;
+};
 
-	if (totalBytes) {
-		loadingProgressBar.style.width = `${Math.min(100, (receivedBytes / totalBytes) * 100)}%`;
-		loadingMeta.textContent = `${ntools.formatBytes(receivedBytes)} / ${ntools.formatBytes(totalBytes)} · ${speedText}`;
-	} else {
-		loadingMeta.textContent = `${ntools.formatBytes(receivedBytes)} · ${speedText}`;
-	}
+const renderDownloadMeta = (receivedBytes, totalBytes, elapsedSec) => {
+	const sizeText = totalBytes ? `${ntools.formatBytes(receivedBytes)} / ${ntools.formatBytes(totalBytes)}` : ntools.formatBytes(receivedBytes);
+	const speed = elapsedSec > 0 ? receivedBytes / elapsedSec : 0;
+	loadingMeta.textContent = `${sizeText} · ${ntools.formatBytes(speed)}/s`;
 };
 
 const positionDropdown = el => {
@@ -553,7 +568,6 @@ const syncUrlParams = () => {
 		lat: map.getCenter().lat.toFixed(4),
 		lon: map.getCenter().lng.toFixed(4),
 		zoom: map.getZoom(),
-		region: state.region,
 		nodes: state.nodeFilter.join(','),
 		freq: state.freqFilter.join(','),
 		date: state.fromDate,
@@ -705,6 +719,7 @@ const inflateNode = node => {
 };
 
 const nodesCache = {};
+let currentDownloadAbort = null;
 
 const renderLegendUpdatedAt = dataUpdatedAt => {
 	legendUpdatedAtEl.textContent = dataUpdatedAt ? ntools.formatTime(new Date(dataUpdatedAt)) : '-';
@@ -720,6 +735,8 @@ const applyDownloadedNodes = cached => {
 };
 
 const downloadNodes = async region => {
+	currentDownloadAbort?.abort();
+
 	if (nodesCache[region]) {
 		applyDownloadedNodes(nodesCache[region]);
 		return;
@@ -739,12 +756,17 @@ const downloadNodes = async region => {
 		return 'recent';
 	};
 
+	const abortController = new AbortController();
+	currentDownloadAbort = abortController;
+
 	try {
 		setLoading(true);
+
 		setLoadingStatus('Łączenie z serwerem...');
-		const nodesReq = await fetch(apiUrl(region));
+		const nodesReq = await fetch(apiUrl(region), { signal: abortController.signal });
 		const dataUpdatedAt = nodesReq.headers.get('X-Data-Updated');
 		const totalBytes = Number(nodesReq.headers.get('Content-Length')) || 0;
+		setLoadingProgress('connect');
 
 		setLoadingStatus('Pobieranie danych...');
 		const reader = nodesReq.body.getReader();
@@ -758,8 +780,14 @@ const downloadNodes = async region => {
 
 			chunks.push(value);
 			receivedBytes += value.length;
-			renderLoadingProgress(receivedBytes, totalBytes, (performance.now() - startTime) / 1000);
+			setLoadingProgress('download', totalBytes ? receivedBytes / totalBytes : 0);
+			renderDownloadMeta(receivedBytes, totalBytes, (performance.now() - startTime) / 1000);
 		}
+
+		setLoadingProgress('download');
+		loadingMeta.textContent = totalBytes
+			? `${ntools.formatBytes(receivedBytes)} / ${ntools.formatBytes(totalBytes)} · Pobrano bazę.`
+			: `${ntools.formatBytes(receivedBytes)} · Pobrano bazę.`;
 
 		const nodesBuffer = new Uint8Array(receivedBytes);
 		let writeOffset = 0;
@@ -770,8 +798,9 @@ const downloadNodes = async region => {
 
 		setLoadingStatus('Rozpakowywanie danych...');
 		const nodes = unpack(nodesBuffer);
+		setLoadingProgress('unpack');
 
-		const presetsPromise = getPresets();
+		const presetsPromise = getPresets(abortController.signal);
 
 		const byType = {};
 		const freqSet = new Set();
@@ -780,7 +809,10 @@ const downloadNodes = async region => {
 		for (let offset = 0; offset < nodes.length; offset += CHUNK_SIZE) {
 			const end = Math.min(offset + CHUNK_SIZE, nodes.length);
 
+			if (abortController.signal.aborted) throw new DOMException('Anulowano przez użytkownika', 'AbortError');
+
 			setLoadingStatus(`Przetwarzanie węzłów... (${end} / ${nodes.length})`);
+			setLoadingProgress('process', end / nodes.length);
 			if (offset > 0) await new Promise(r => setTimeout(r, 0));
 
 			for (let i = offset; i < end; i++) {
@@ -812,23 +844,35 @@ const downloadNodes = async region => {
 			}
 		}
 
-		setLoadingStatus('Pobieranie presetów radiowych...');
+		if (abortController.signal.aborted) throw new DOMException('Anulowano przez użytkownika', 'AbortError');
+
+		setLoadingStatus('Uzyskiwanie presetów radiowych...');
+		setLoadingProgress('presets', 0);
 		try {
 			await presetsPromise;
 		}
 		catch (err) {
+			if (err.name === 'AbortError') throw err;
 			console.error('Nie udało się pobrać presetów radiowych:', err);
 		}
+		setLoadingProgress('presets');
+
+		setLoadingStatus('Gotowe.');
 
 		nodesCache[region] = { nodes, byType, availableFreqs: [...freqSet].sort((a, b) => a - b), dataUpdatedAt };
 		applyDownloadedNodes(nodesCache[region]);
 	}
 	catch (e) {
-		alert('Wystąpił nieoczekiwany błąd podczas wczytywania danych. Spróbuj ponownie.');
-		console.error(e);
+		if (e.name !== 'AbortError') {
+			alert('Wystąpił nieoczekiwany błąd podczas wczytywania danych. Spróbuj ponownie.');
+			console.error(e);
+		}
 	}
 	finally {
-		setLoading(false);
+		if (currentDownloadAbort === abortController) {
+			currentDownloadAbort = null;
+			setLoading(false);
+		}
 	}
 };
 
@@ -836,6 +880,7 @@ const setRegion = async region => {
 	if (region === state.region) return;
 
 	state.region = region;
+	localStorage.setItem('regionSelected', region);
 	updateRegionToggleUI();
 	await downloadNodes(region);
 	applyFilters();
@@ -879,7 +924,55 @@ clusteringZoomInput.addEventListener('input', () => {
 
 clearFiltersBtn.addEventListener('click', clearFilters);
 
-regionToggle.addEventListener('click', () => setRegion(state.region === 'all' ? 'pl' : 'all'));
+loadingCancelBtn.addEventListener('click', () => currentDownloadAbort?.abort());
+
+const confirmRegionWarning = () => new Promise(resolve => {
+	function cleanup(confirmed) {
+		regionWarningOverlay.hidden = true;
+		regionWarningConfirmBtn.removeEventListener('click', onConfirm);
+		regionWarningCancelBtn.removeEventListener('click', onCancel);
+		regionWarningOverlay.removeEventListener('click', onOverlayClick);
+		document.removeEventListener('keydown', onKeydown);
+		resolve(confirmed);
+	}
+
+	function onConfirm() { cleanup(true); }
+	function onCancel() { cleanup(false); }
+	function onOverlayClick(e) { if (e.target === regionWarningOverlay) cleanup(false); }
+	function onKeydown(e) { if (e.key === 'Escape') cleanup(false); }
+
+	regionWarningConfirmBtn.addEventListener('click', onConfirm);
+	regionWarningCancelBtn.addEventListener('click', onCancel);
+	regionWarningOverlay.addEventListener('click', onOverlayClick);
+	document.addEventListener('keydown', onKeydown);
+
+	regionWarningOverlay.hidden = false;
+	regionWarningCancelBtn.focus();
+});
+
+const getRegionDataSize = async region => {
+	try {
+		const res = await fetch(apiUrl(region), { method: 'HEAD' });
+		return Number(res.headers.get('Content-Length')) || 0;
+	}
+	catch {
+		return 0;
+	}
+};
+
+regionToggle.addEventListener('click', async () => {
+	const targetRegion = state.region === 'all' ? 'pl' : 'all';
+
+	if (targetRegion === 'all' && !nodesCache.all) {
+		const size = await getRegionDataSize('all');
+		regionWarningSizeEl.textContent = size ? `około ${ntools.formatBytes(size)}` : 'nieznany rozmiar';
+
+		const confirmed = await confirmRegionWarning();
+		if (!confirmed) return;
+	}
+
+	void setRegion(targetRegion);
+});
 
 let currentBaseMap = baseMapSelected;
 
