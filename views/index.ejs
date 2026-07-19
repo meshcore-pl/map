@@ -123,33 +123,31 @@
 </header>
 
 <menu class="filters-menu" id="node-filter" hidden>
-	<li>
-		<label class="checkbox-label"><input type="checkbox" class="node-type-checkbox" value="1" checked> Klienci</label>
-	</li>
-	<li>
-		<label class="checkbox-label"><input type="checkbox" class="node-type-checkbox" value="2" checked> Repeatery</label>
-	</li>
-	<li>
-		<label class="checkbox-label"><input type="checkbox" class="node-type-checkbox" value="3" checked> Serwery pokoju</label>
-	</li>
-	<li>
-		<label class="checkbox-label"><input type="checkbox" class="node-type-checkbox" value="4" checked> Czujniki</label>
-	</li>
-	<li class="field-group">
-		<label for="from-date">Ostatnia aktualizacja</label>
-		<input type="date" class="date-input" id="from-date">
-	</li>
-	<li class="field-group">
-		<label for="from-insert-date">Dodano</label>
-		<input type="date" class="date-input" id="from-insert-date">
-	</li>
-	<li class="field-group">
-		<label for="clustering-zoom">Poziom powiększenia grupowania</label>
-		<input type="range" id="clustering-zoom" min="10" max="17" value="11">
-	</li>
-	<li class="field-group" id="freq-filter-group" hidden>
-		<span>Częstotliwość</span>
-		<div id="freq-filter-list"></div>
+	<li class="filters-row">
+		<div class="filters-col filters-col-main">
+			<div class="node-type-group">
+				<label class="checkbox-label"><input type="checkbox" class="node-type-checkbox" value="1" checked> Klienci</label>
+				<label class="checkbox-label"><input type="checkbox" class="node-type-checkbox" value="2" checked> Repeatery</label>
+				<label class="checkbox-label"><input type="checkbox" class="node-type-checkbox" value="3" checked> Serwery pokoju</label>
+				<label class="checkbox-label"><input type="checkbox" class="node-type-checkbox" value="4" checked> Czujniki</label>
+			</div>
+			<div class="field-group">
+				<label for="from-date">Ostatnia aktualizacja</label>
+				<input type="date" class="date-input" id="from-date">
+			</div>
+			<div class="field-group">
+				<label for="from-insert-date">Dodano</label>
+				<input type="date" class="date-input" id="from-insert-date">
+			</div>
+			<div class="field-group">
+				<label for="clustering-zoom">Poziom powiększenia grupowania</label>
+				<input type="range" id="clustering-zoom" min="10" max="17" value="11">
+			</div>
+		</div>
+		<div class="filters-col filters-col-freq field-group" id="freq-filter-group" hidden>
+			<span>Częstotliwość</span>
+			<div id="freq-filter-list"></div>
+		</div>
 	</li>
 	<li>
 		<button type="button" class="clear-filters-btn" id="clear-filters-btn" hidden>Wyczyść filtry</button>

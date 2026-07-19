@@ -567,11 +567,15 @@ a:active {
 .filters-menu, .search-results {
 	position: fixed;
 	z-index: 1001;
-	width: 320px;
 	max-width: calc(100vw - 40px);
 }
 
+.search-results {
+	width: 320px;
+}
+
 .filters-menu {
+	width: 360px;
 	list-style: none;
 	margin: 0;
 	padding: 14px;
@@ -607,6 +611,40 @@ a:active {
 .filters-menu > li:not(:last-child) {
 	padding-bottom: 14px;
 	border-bottom: 1px solid var(--border);
+}
+
+.filters-row {
+	display: flex;
+	align-items: flex-start;
+	gap: 16px;
+}
+
+.filters-col {
+	display: flex;
+	flex-direction: column;
+	gap: 14px;
+	min-width: 0;
+}
+
+.filters-col-main {
+	flex: 1 1 auto;
+}
+
+.filters-col-main > *:not(:last-child) {
+	padding-bottom: 14px;
+	border-bottom: 1px solid var(--border);
+}
+
+.filters-col-freq {
+	flex: 0 0 108px;
+	padding-left: 16px;
+	border-left: 1px solid var(--border);
+}
+
+.node-type-group {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
 }
 
 .checkbox-label {
@@ -1141,5 +1179,19 @@ time {
 
 	.github-link {
 		order: 6;
+	}
+}
+
+@media (max-width: 360px) {
+	.filters-row {
+		flex-direction: column;
+	}
+
+	.filters-col-freq {
+		flex-basis: auto;
+		padding-left: 0;
+		padding-top: 14px;
+		border-left: none;
+		border-top: 1px solid var(--border);
 	}
 }
