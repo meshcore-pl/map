@@ -1,20 +1,26 @@
 # Polska mapa MeshCore 🗺️
-Interaktywna mapa węzłów sieci MeshCore w Polsce i na świecie. Projekt składa się z lekkiego frontendu mapowego oraz backendu Node.js, który pobiera dane z publicznego API MeshCore i przechowuje je w pamięci podręcznej Redis.
+Interaktywna mapa węzłów sieci MeshCore w Polsce i na świecie.
+Projekt składa się z frontendu oraz backendu (w Node.js), który pobiera dane z publicznego API MeshCore i przechowuje je w pamięci podręcznej Redis.
 
-## Funkcje
-- Wyświetlanie węzłów na interaktywnej mapie
-- Grupowanie znaczników przy użyciu klastrów
-- Wyszukiwanie i filtrowanie węzłów
-- Cykliczne odświeżanie danych co 5 minut
-- Binarne przesyłanie danych w formacie MessagePack
-
-## Nowości / zmiany
-- Przetłumaczono wszystko na nasz język
-- Przełączanie pomiędzy węzłami z Polski i całego świata
-- Domyślnie od razu przy wejściu na stronę pojawi się Polska
-- Nowoczesny kod HTML5, CSS3 (vanilla)
+## Czym się wyróżnia?
+- Przetłumaczono wszystko na język polski
+- Możliwość przełączenia się pomiędzy węzłami z Polski i całego świata
+- Opcja udostępnienia węzła lub kontaktu
+- Możliwość skopiowania informacji o węźle lub o kontakcie
+- Domyślnie od razu na start na stronę pojawi się Polska
 - Podbito zależności do najnowszych wersji
 - Zoptymalizowano transfer, dzięki czemu strona będzie się szybciej wczytywać
+- Ulepszono wyszukiwarkę repeaterów oraz kontaktów (skróty klawiszowe)
+- Nowoczesny wygląd oraz kod HTML5 + CSS3 (Vanilla)
+
+## Plany
+Wkrótce powstanie serwis [meshcoreprofiles.com](https://meshcoreprofiles.com), zintegrowany z mapą węzłów z całego świata.
+
+- Użytkownicy, którzy podadzą swoje dane, otrzymają własny profil.
+- Wybrane informacje z profili będą widoczne bezpośrednio na mapie, dzięki czemu będzie można łatwo sprawdzić, do kogo należy dany węzeł.
+- Właściciele repeaterów będą mogli przesyłać ich zdjęcia, które następnie zostaną publicznie wyświetlone w serwisie.
+
+Testowa wersja konfiguratora jest obecnie dostępna wyłącznie dla użytkowników serwera [Discord MeshCore Polska](https://meshcorepolska.org/discord) (komenda `/konfigurator` od `Sefi#6347`). [Zobacz przykładowy profil](https://beta.sefinek.net/meshcore-pl/kontakty/6a43efd454feb8be5679e0a6).
 
 ## Wymagania
 - Node.js >=20.12.0
@@ -59,7 +65,7 @@ GET /api/v1/nodes?region=all
 - [Redis](https://github.com/redis/node-redis)
 
 ## Uznania
-Projekt powstał na bazie [map.meshcore.dev](https://github.com/recrof/map.meshcore.dev) autorstwa [recrof](https://github.com/recrof) (Rastislav Vysoký). Kod został znacząco przebudowany i jest udostępniany na tej samej licencji.
+Projekt powstał na bazie [map.meshcore.dev](https://github.com/recrof/map.meshcore.dev) autorstwa [recrof](https://github.com/recrof) (Rastislav Vysoký).
 
 ## Licencja
 Projekt jest dostępny na licencji MIT. Szczegóły znajdują się w pliku [LICENSE](LICENSE).
