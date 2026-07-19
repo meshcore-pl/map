@@ -931,15 +931,13 @@ const downloadNodes = async region => {
 
 		nodesCache[region] = { nodes, byType, availableFreqs: [...freqSet].sort((a, b) => a - b), dataUpdatedAt };
 		applyDownloadedNodes(nodesCache[region]);
-	}
-	catch (e) {
-		if (e.name !== 'AbortError') {
-			const message = e.isApiError ? e.message : 'Wystąpił nieoczekiwany błąd podczas wczytywania danych. Spróbuj ponownie.';
+	} catch (err) {
+		if (err.name !== 'AbortError') {
+			const message = err.isApiError ? err.message : 'Wystąpił nieoczekiwany błąd podczas wczytywania danych. Spróbuj ponownie.';
 			showToast(message, { status: 'error', duration: 6000 });
-			console.error(e);
+			console.error(err);
 		}
-	}
-	finally {
+	} finally {
 		if (currentDownloadAbort === abortController) {
 			currentDownloadAbort = null;
 			setLoading(false);
@@ -1059,8 +1057,7 @@ const getRegionDataSize = async region => {
 	try {
 		const res = await fetch(apiUrl(region), { method: 'HEAD' });
 		return Number(res.headers.get('Content-Length')) || 0;
-	}
-	catch {
+	} catch {
 		return 0;
 	}
 };
@@ -1104,12 +1101,8 @@ document.addEventListener('click', e => {
 });
 
 document.addEventListener('click', e => {
-	if (!filterMenu.hidden && !filterMenu.contains(e.target) && !filterToggle.contains(e.target)) {
-		filterMenu.hidden = true;
-	}
-	if (!searchResultsEl.hidden && !searchResultsEl.contains(e.target) && !searchInline.contains(e.target)) {
-		searchResultsEl.hidden = true;
-	}
+	if (!filterMenu.hidden && !filterMenu.contains(e.target) && !filterToggle.contains(e.target)) filterMenu.hidden = true;
+	if (!searchResultsEl.hidden && !searchResultsEl.contains(e.target) && !searchInline.contains(e.target)) searchResultsEl.hidden = true;
 });
 
 window.addEventListener('resize', () => {
