@@ -856,9 +856,7 @@ const downloadNodes = async region => {
 		}
 
 		setLoadingProgress('download');
-		loadingMeta.textContent = totalBytes
-			? `${ntools.formatBytes(receivedBytes)} / ${ntools.formatBytes(totalBytes)} · Pobrano bazę.`
-			: `${ntools.formatBytes(receivedBytes)} · Pobrano bazę.`;
+		loadingMeta.textContent = `${ntools.formatBytes(receivedBytes)} / ${ntools.formatBytes(totalBytes)} · Ukończono`;
 
 		const nodesBuffer = new Uint8Array(receivedBytes);
 		let writeOffset = 0;
