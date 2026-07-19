@@ -575,12 +575,12 @@ a:active {
 }
 
 .filters-menu {
-	width: 360px;
+	width: 420px;
 	list-style: none;
 	margin: 0;
 	padding: 14px;
 	max-height: 70vh;
-	overflow-y: auto;
+	overflow: hidden;
 	display: flex;
 	flex-direction: column;
 	gap: 14px;
@@ -608,15 +608,16 @@ a:active {
 	}
 }
 
-.filters-menu > li:not(:last-child) {
-	padding-bottom: 14px;
-	border-bottom: 1px solid var(--border);
-}
-
 .filters-row {
 	display: flex;
-	align-items: flex-start;
+	align-items: stretch;
 	gap: 16px;
+	min-height: 0;
+}
+
+.filters-row:has(+ li .clear-filters-btn:not([hidden])) {
+	padding-bottom: 14px;
+	border-bottom: 1px solid var(--border);
 }
 
 .filters-col {
@@ -627,7 +628,7 @@ a:active {
 }
 
 .filters-col-main {
-	flex: 1 1 auto;
+	flex: 1 1 0;
 }
 
 .filters-col-main > *:not(:last-child) {
@@ -636,9 +637,10 @@ a:active {
 }
 
 .filters-col-freq {
-	flex: 0 0 108px;
+	flex: 1 1 0;
 	padding-left: 16px;
 	border-left: 1px solid var(--border);
+	min-height: 0;
 }
 
 .node-type-group {
@@ -718,7 +720,11 @@ a:active {
 #freq-filter-list {
 	display: flex;
 	flex-direction: column;
+	flex: 1 1 auto;
 	gap: 4px;
+	min-height: 0;
+	overflow-y: auto;
+	padding-right: 6px;
 }
 
 .clear-filters-btn {
