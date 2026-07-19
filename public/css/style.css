@@ -1018,10 +1018,6 @@ a:active {
 	color: var(--red-bright);
 }
 
-.node-info-full {
-	padding-top: 6px !important;
-}
-
 .param-chips {
 	display: flex;
 	flex-wrap: wrap;

@@ -286,7 +286,7 @@ const getNodePopupHTML = node => {
 					</button>
 				</div>
 				<div class="node-badges">
-					<span class="badge badge-type">${types[node.type]}</span>
+					<span class="badge">${types[node.type]}</span>
 					${node.status ? `<span class="badge ${statusClass}"><span class="badge-dot"></span>${updateStatusDesc[node.status]}</span>` : ''}
 				</div>
 			</div>
