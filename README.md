@@ -15,7 +15,7 @@ Projekt składa się z frontendu oraz backendu napisanego w Node.js. Backend pob
 ## Plany
 Planowany jest serwis `meshcoreprofiles.com`, zintegrowany z mapą węzłów z całego świata.
 
-- Użytkownicy, którzy podadzą swoje dane, otrzymają własny profil.
+- Użytkownicy, którzy wprowadzą dane o companionie lub RPT, otrzymają własny profil.
 - Wybrane informacje z profili będą widoczne bezpośrednio na mapie, dzięki czemu będzie można łatwo sprawdzić, do kogo należy dany węzeł.
 - Właściciele repeaterów będą mogli przesyłać ich zdjęcia, które następnie zostaną publicznie wyświetlone w serwisie.
 
