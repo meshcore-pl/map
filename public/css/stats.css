@@ -1,0 +1,230 @@
+#stats-panel {
+	position: relative;
+	width: 100%;
+	max-width: 640px;
+	max-height: calc(100vh - 40px);
+	max-height: calc(100dvh - 40px);
+	overflow-y: auto;
+	overscroll-behavior: contain;
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	padding: 18px;
+	background: var(--bg-panel);
+	-webkit-backdrop-filter: blur(6px);
+	backdrop-filter: blur(6px);
+	border: 1px solid var(--border);
+	border-radius: var(--radius);
+	box-shadow: var(--shadow-lg);
+	transition: opacity 0.18s var(--ease), transform 0.18s var(--ease);
+	transform: scale(1);
+}
+
+.modal-overlay[hidden] #stats-panel {
+	transform: scale(0.96);
+}
+
+@starting-style {
+	.modal-overlay:not([hidden]) #stats-panel {
+		transform: scale(0.96);
+	}
+}
+
+#stats-chips {
+	display: flex;
+	gap: 8px;
+	margin: 4px 0 10px;
+}
+
+.stats-chip {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 2px;
+	padding: 8px 4px;
+	border: 1px solid var(--border);
+	border-radius: var(--radius-sm);
+	background: rgba(255, 255, 255, 0.03);
+}
+
+.stats-chip-label {
+	font-family: var(--font-mono);
+	font-size: 15px;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	color: var(--text-muted);
+}
+
+.stats-chip-value {
+	font-size: 20px;
+	font-weight: 700;
+	color: var(--red-bright);
+}
+
+#stats-period-group {
+	display: flex;
+	gap: 6px;
+	margin: 4px 0 10px;
+}
+
+#stats-period-group[hidden] {
+	display: none;
+}
+
+.stats-period-btn {
+	flex: 1;
+	font: inherit;
+	font-size: 14px;
+	font-weight: 500;
+	padding: 6px 0;
+	border: 1px solid var(--border-strong);
+	border-radius: var(--radius-sm);
+	background: transparent;
+	color: var(--text-muted);
+	cursor: pointer;
+	transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.stats-period-btn:hover {
+	background: var(--bg-panel-hover);
+}
+
+.stats-period-btn.active {
+	background: var(--red-glow);
+	border-color: var(--red);
+	color: #fff;
+}
+
+#stats-range-inputs {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin: 4px 0 10px;
+}
+
+#stats-range-inputs[hidden] {
+	display: none;
+}
+
+#stats-range-inputs .date-input {
+	flex: 1;
+	min-width: 0;
+	padding: 6px 10px;
+	font-size: 14px;
+	font-weight: 500;
+	border-color: var(--border-strong);
+	background: transparent;
+}
+
+#stats-range-inputs .date-input:hover {
+	background: var(--bg-panel-hover);
+}
+
+#stats-range-sep {
+	flex-shrink: 0;
+	color: var(--text-muted);
+}
+
+#stats-range-back-btn {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+	width: 31px;
+	height: 31px;
+	padding: 0;
+	border: 1px solid var(--border-strong);
+	border-radius: var(--radius-sm);
+	background: transparent;
+	color: var(--text-muted);
+	cursor: pointer;
+	transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+#stats-range-back-btn:hover {
+	background: var(--bg-panel-hover);
+	color: var(--text);
+}
+
+#stats-range-back-btn .icon {
+	width: 16px;
+	height: 16px;
+}
+
+#stats-show-on-map-btn {
+	margin-top: 10px;
+	width: 100%;
+}
+
+#stats-show-on-map-btn:disabled {
+	opacity: 0.45;
+	cursor: not-allowed;
+}
+
+#stats-repeater-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	max-height: 420px;
+	overflow-y: auto;
+	overscroll-behavior: contain;
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 2px 8px;
+}
+
+#stats-repeater-list li {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	min-width: 0;
+	padding: 7px 6px;
+	border-radius: var(--radius-sm);
+	cursor: pointer;
+}
+
+#stats-repeater-list li svg {
+	flex-shrink: 0;
+}
+
+#stats-repeater-list li:hover {
+	background: var(--bg-panel-hover);
+}
+
+.stats-repeater-text {
+	min-width: 0;
+}
+
+.stats-repeater-text h6 {
+	margin: 0;
+	font-size: 15px;
+	color: var(--text);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.stats-repeater-text span {
+	font-size: 13px;
+	color: var(--text-muted);
+}
+
+.stats-repeater-empty {
+	grid-column: 1 / -1;
+	padding: 14px 6px;
+	text-align: center;
+	color: var(--text-muted);
+	font-size: 15px;
+	cursor: default;
+}
+
+.stats-repeater-empty:hover {
+	background: none;
+}
+
+@media (max-width: 800px) {
+	#stats-panel {
+		max-width: calc(100vw - 28px);
+	}
+}

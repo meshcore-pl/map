@@ -1,0 +1,153 @@
+.settings-panel#legend-panel {
+	max-width: 610px;
+	gap: 12px;
+}
+
+.settings-panel#changelog-panel {
+	max-width: 610px;
+	max-height: 65vh;
+	max-height: 65dvh;
+}
+
+@media (max-width: 800px) {
+	.settings-panel#legend-panel,
+	.settings-panel#changelog-panel {
+		max-width: calc(100vw - 28px);
+	}
+}
+
+@media (max-width: 480px) {
+	#legend-columns {
+		grid-template-columns: 1fr;
+		row-gap: 14px;
+	}
+
+	#legend-footer {
+		flex-direction: column;
+		align-items: stretch;
+	}
+
+	#legend-footer .btn {
+		justify-content: center;
+	}
+
+	.changelog-version-title {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 2px;
+	}
+}
+
+#legend-plans {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	padding-bottom: 12px;
+	border-bottom: 1px solid var(--border);
+	font-size: 14px;
+	line-height: 1.45;
+	color: var(--text-muted);
+}
+
+#legend-plans p,
+#legend-plans ul {
+	margin: 0;
+}
+
+#legend-plans ul {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	padding-left: 20px;
+}
+
+#legend-plans code {
+	color: var(--text);
+}
+
+#legend-columns {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	column-gap: 24px;
+}
+
+.legend-col {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.legend-row {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 3px 0;
+	font-size: 15px;
+}
+
+.legend-icon {
+	flex-shrink: 0;
+}
+
+.legend-icon-plain {
+	color: var(--red-bright);
+}
+
+#legend-footer {
+	display: flex;
+	flex-direction: row;
+	align-items: flex-end;
+	justify-content: space-between;
+	gap: 10px;
+	padding-top: 8px;
+	border-top: 1px solid var(--border);
+	font-size: 13px;
+	color: var(--text-muted);
+}
+
+#legend-footer-meta {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+}
+
+#legend-footer .btn {
+	flex-shrink: 0;
+}
+
+#changelog-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+}
+
+.changelog-version-title {
+	display: flex;
+	align-items: baseline;
+	gap: 8px;
+	font-size: 17px;
+	font-weight: 700;
+	color: var(--text);
+	margin-bottom: 6px;
+}
+
+.changelog-version-date {
+	font-size: 13px;
+	font-weight: 400;
+	color: var(--text-muted);
+	cursor: default;
+	text-decoration: none;
+}
+
+.changelog-changes {
+	margin: 0;
+	padding-left: 20px;
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	font-size: 15px;
+	color: var(--text-muted);
+}
