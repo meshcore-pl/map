@@ -3,7 +3,7 @@ import { initModal } from './modal.js';
 const CHANGELOG = [
 	{
 		version: '0.4.0',
-		date: '28.07.2026',
+		date: '31.07.2026',
 		changes: [
 			'Dodano nowe narzędzia: pomiar odległości, wyznaczanie trasy po nazwach lub kluczach węzłów oraz analizę terenu i zasięgu między dwoma punktami (profil wysokościowy i orientacyjna widoczność optyczna).',
 			'W statystykach "Nowe węzły" dodano własny zakres dat oraz przycisk "Pokaż na mapie", który podświetla wybrane węzły i przybliża do nich widok.',
