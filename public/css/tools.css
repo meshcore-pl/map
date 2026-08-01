@@ -60,7 +60,10 @@
 	font-family: var(--font-mono);
 	font-weight: 700;
 	font-size: 15px;
-	color: var(--red-bright);
+	background: var(--brand-gradient, var(--red-bright));
+	-webkit-background-clip: text;
+	background-clip: text;
+	color: transparent;
 }
 
 #measure-close-btn {

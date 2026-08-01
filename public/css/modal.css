@@ -161,7 +161,7 @@
 
 #region-warning-confirm {
 	border-color: var(--red-dark);
-	background: var(--red);
+	background: var(--brand-gradient, var(--red));
 	color: #fff;
 }
 
