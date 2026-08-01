@@ -1,3 +1,4 @@
+import { t } from './i18n.js';
 import { createPathLayer, findNodeNearLatLng, formatDistance, loadJson } from './pathtools.js';
 import { truncateKey } from './node-utils.js';
 
@@ -6,7 +7,13 @@ const LABEL_MODE_STORAGE_KEY = 'measureLabelMode';
 const POINT_HIT_RADIUS_PX = 14;
 
 const LABEL_MODES = ['name', '1', '2', '3', 'mid'];
-const LABEL_MODE_TEXT = { name: 'Nazwy', 1: '1 bajt', 2: '2 bajty', 3: '3 bajty', mid: 'Środek' };
+const LABEL_MODE_TEXT = {
+	name: t('measure:labelModes.name'),
+	1: t('measure:labelModes.bytes1'),
+	2: t('measure:labelModes.bytes2'),
+	3: t('measure:labelModes.bytes3'),
+	mid: t('measure:labelModes.mid'),
+};
 
 const loadSavedPoints = () => {
 	const raw = loadJson(STORAGE_KEY);
@@ -44,14 +51,14 @@ export const initMeasureTool = ({ map, setPicker, escapeHtml, getNodes, showToas
 		if (segments.length) {
 			listEl.innerHTML = segments.map((s, i) => `
 				<li>
-					<span>${i + 1}. ${escapeHtml(getPointLabel(s.from, `Punkt ${i + 1}`))} → ${escapeHtml(getPointLabel(s.to, `Punkt ${i + 2}`))}</span>
+					<span>${i + 1}. ${escapeHtml(getPointLabel(s.from, t('common:pointFallback', { n: i + 1 })))} → ${escapeHtml(getPointLabel(s.to, t('common:pointFallback', { n: i + 2 })))}</span>
 					<b>${formatDistance(s.distance)}</b>
 				</li>
 			`).join('');
 		} else if (points.length === 1) {
-			listEl.innerHTML = '<li class="tool-panel-empty">Wybrano pierwszy, proszę wybrać drugi.</li>';
+			listEl.innerHTML = `<li class="tool-panel-empty">${t('measure:selectSecondPoint')}</li>`;
 		} else {
-			listEl.innerHTML = '<li class="tool-panel-empty">Nie wybrano jeszcze żadnych punktów.</li>';
+			listEl.innerHTML = `<li class="tool-panel-empty">${t('measure:noPointsSelected')}</li>`;
 		}
 
 		totalEl.textContent = formatDistance(path.getTotalDistance(segments));
@@ -132,7 +139,7 @@ export const initMeasureTool = ({ map, setPicker, escapeHtml, getNodes, showToas
 	});
 
 	shareBtn.addEventListener('click', () => {
-		if (shareUrl) void navigator.clipboard.writeText(shareUrl).then(() => showToast('Skopiowano do schowka'));
+		if (shareUrl) void navigator.clipboard.writeText(shareUrl).then(() => showToast(t('common:copiedToClipboard')));
 	});
 
 	labelModeBtn.textContent = LABEL_MODE_TEXT[labelMode];

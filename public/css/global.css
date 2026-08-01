@@ -7,11 +7,6 @@
 	--chip-bg: rgba(148, 166, 204, 0.12);
 	--text: #eef1f8;
 	--text-muted: #99a1b5;
-	--red: #e01230;
-	--red-bright: #ff3352;
-	--red-light: #ff7d92;
-	--red-dark: #b30d26;
-	--red-glow: rgba(224, 18, 48, 0.35);
 	--blue: #339af0;
 	--blue-bright: #4dabf7;
 	--blue-light: #7cc4f7;
@@ -457,6 +452,23 @@ a:active {
 	color: var(--red-bright);
 }
 
+.region-toggle-btn.lang-select {
+	appearance: none;
+	-webkit-appearance: none;
+	padding: 8px 34px 8px 16px;
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2399a1b5' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+	background-repeat: no-repeat;
+	background-position: right 12px center;
+	background-size: 16px;
+	color-scheme: dark;
+}
+
+.region-toggle-btn.lang-select:focus-visible {
+	outline: none;
+	border-color: var(--red);
+	box-shadow: 0 0 0 3px var(--red-glow);
+}
+
 #github-link {
 	display: flex;
 	align-items: center;
@@ -485,13 +497,13 @@ a:active {
 
 .highlight-marker-ring {
 	fill: none;
-	stroke: #ff3352;
+	stroke: var(--red-bright);
 	stroke-width: 3;
 	animation: highlight-pulse 1.4s ease-in-out infinite;
 }
 
 .highlight-marker-ping {
-	fill: #ff3352;
+	fill: var(--red-bright);
 	fill-opacity: 0.35;
 	transform-box: fill-box;
 	transform-origin: center;
@@ -1024,27 +1036,27 @@ select.date-input {
 }
 
 .marker-cluster-small {
-	background-color: rgba(224, 18, 48, 0.25);
+	background-color: color-mix(in srgb, var(--red) 25%, transparent);
 }
 
 .marker-cluster-small div {
-	background-color: rgba(224, 18, 48, 0.65);
+	background-color: color-mix(in srgb, var(--red) 65%, transparent);
 }
 
 .marker-cluster-medium {
-	background-color: rgba(224, 18, 48, 0.32);
+	background-color: color-mix(in srgb, var(--red) 32%, transparent);
 }
 
 .marker-cluster-medium div {
-	background-color: rgba(224, 18, 48, 0.78);
+	background-color: color-mix(in srgb, var(--red) 78%, transparent);
 }
 
 .marker-cluster-large {
-	background-color: rgba(179, 13, 38, 0.4);
+	background-color: color-mix(in srgb, var(--red-dark) 40%, transparent);
 }
 
 .marker-cluster-large div {
-	background-color: rgba(179, 13, 38, 0.9);
+	background-color: color-mix(in srgb, var(--red-dark) 90%, transparent);
 }
 
 .marker-cluster span {

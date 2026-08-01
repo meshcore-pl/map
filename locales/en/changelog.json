@@ -1,0 +1,63 @@
+{
+	"entries": [
+		{
+			"version": "0.5.0",
+			"date": "2026-08-01",
+			"changes": [
+				"Prepared the site for the global MeshCore Profiles map - map.meshcoreprofiles.com.",
+				"Implemented i18n.",
+				"Other minor fixes and improvements."
+			]
+		},
+		{
+			"version": "0.4.0",
+			"date": "2026-07-31",
+			"changes": [
+				"Added new tools: distance measurement, route drawing by node names or keys, and terrain/range analysis between two points (elevation profile and approximate line-of-sight visibility).",
+				"Added a custom date range and a \"Show on map\" button to the \"New nodes\" statistics, which highlights the selected nodes and zooms in on them.",
+				"Added close buttons to the settings, statistics, legend and changelog windows.",
+				"The search magnifier icon now hides with an animation after clicking the field, and Escape clears the results and removes focus from it.",
+				"Other minor visual and animation fixes."
+			]
+		},
+		{
+			"version": "0.3.0",
+			"date": "2026-07-26",
+			"changes": [
+				"Finished responsive design work. The site now works correctly on mobile devices.",
+				"Added vibration on button press (Android).",
+				"Published a new API with repeater statistics for meshcorepolska.org.",
+				"Other minor fixes and improvements, including SEO."
+			]
+		},
+		{
+			"version": "0.2.0",
+			"date": "2026-07-20",
+			"changes": [
+				"Added the \"Close the filter panel after applying\" setting.",
+				"Added the \"Show OpenFreeMap in the map switcher\" setting.",
+				"Added new maps: CartoDB Dark, CartoDB Positron, CyclOSM and Humanitarian OSM.",
+				"CartoDB Dark is now the default map.",
+				"Added a changelog.",
+				"Fixed and improved filter functionality.",
+				"Fixed some animations.",
+				"Redesigned the \"i\" button in the bottom-right corner of the page.",
+				"Other minor visual fixes."
+			]
+		},
+		{
+			"version": "0.1.0",
+			"date": "2026-07-19",
+			"changes": [
+				"Polish-language interface.",
+				"Ability to switch between nodes from Poland and the whole world.",
+				"Sharing a selected node or contact via a direct link.",
+				"Copying node and contact data to the clipboard.",
+				"Poland selected as the default region on first launch.",
+				"Data sent in a compact MessagePack format; only nodes from Poland are fetched in the default view.",
+				"Searching nodes by name and public key, with keyboard support.",
+				"Frontend built with HTML, CSS and JavaScript with no application framework, modern code."
+			]
+		}
+	]
+}

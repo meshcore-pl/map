@@ -28,7 +28,7 @@ Testowa wersja konfiguratora jest obecnie dostępna wyłącznie dla użytkownik�
 
 ## Instalacja
 ```bash
-git clone https://github.com/meshcore-pl/map.git mapa.meshcorepolska.org
+git clone https://github.com/meshcore-profiles/map.git mapa.meshcorepolska.org
 cd mapa.meshcorepolska.org
 npm install
 cp .env.example .env

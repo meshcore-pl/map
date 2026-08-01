@@ -1,9 +1,10 @@
+import { t } from './i18n.js';
 import { initModal } from './modal.js';
 import { createPathLayer, formatDistance, resolveNodeByQuery } from './pathtools.js';
 
 const STORAGE_KEY = 'routeToolInput';
 
-const splitTokens = raw => raw.split(/[\n,>]+/).map(t => t.trim()).filter(Boolean);
+const splitTokens = raw => raw.split(/[\n,>]+/).map(token => token.trim()).filter(Boolean);
 
 export const initRouteTool = ({ map, getNodes, escapeHtml }) => {
 	const modal = initModal('route-toggle', 'route-overlay');
@@ -26,22 +27,22 @@ export const initRouteTool = ({ map, getNodes, escapeHtml }) => {
 		const segments = path.getSegments();
 		let segmentIndex = 0;
 
-		listEl.innerHTML = tokens.map(t => {
-			if (!t.node) return `<li class="tool-panel-error"><span>${escapeHtml(t.raw)}</span><b>nie znaleziono</b></li>`;
+		listEl.innerHTML = tokens.map(token => {
+			if (!token.node) return `<li class="tool-panel-error"><span>${escapeHtml(token.raw)}</span><b>${t('route:notFound')}</b></li>`;
 
 			const segment = segmentIndex < segments.length ? segments[segmentIndex++] : null;
-			return `<li><span>${escapeHtml(t.node.adv_name)}</span><b>${segment ? formatDistance(segment.distance) : ''}</b></li>`;
+			return `<li><span>${escapeHtml(token.node.adv_name)}</span><b>${segment ? formatDistance(segment.distance) : ''}</b></li>`;
 		}).join('');
 
 		totalEl.hidden = false;
-		totalEl.textContent = `Łącznie: ${formatDistance(path.getTotalDistance(segments))}`;
+		totalEl.textContent = t('route:total', { distance: formatDistance(path.getTotalDistance(segments)) });
 	};
 
 	const drawRoute = () => {
 		const nodes = getNodes();
 		const tokens = splitTokens(inputEl.value).map(raw => ({ raw, node: resolveNodeByQuery(raw, nodes) }));
 
-		path.setPoints(tokens.filter(t => t.node).map(t => ({ lat: t.node.lat, lng: t.node.lon, label: t.node.adv_name })));
+		path.setPoints(tokens.filter(token => token.node).map(token => ({ lat: token.node.lat, lng: token.node.lon, label: token.node.adv_name })));
 		renderResults(tokens);
 		return tokens;
 	};

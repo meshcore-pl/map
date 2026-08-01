@@ -1,3 +1,5 @@
+import { t } from './i18n.js';
+
 const getContainer = () => document.getElementById('toast-container');
 
 const renderToastContent = (el, message, status) => {
@@ -47,7 +49,7 @@ export const showActionToast = (message, { status = 'info', onClose } = {}) => {
 	const closeBtn = document.createElement('button');
 	closeBtn.type = 'button';
 	closeBtn.className = 'toast-close-btn';
-	closeBtn.setAttribute('aria-label', 'Zamknij');
+	closeBtn.setAttribute('aria-label', t('common:close'));
 	closeBtn.innerHTML = '<svg class="icon" aria-hidden="true"><use href="/icons/icons.svg#close"></use></svg>';
 	closeBtn.addEventListener('click', () => {
 		dismissToast(el);

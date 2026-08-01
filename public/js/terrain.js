@@ -1,3 +1,4 @@
+import { t } from './i18n.js';
 import { initModal } from './modal.js';
 import { createPathLayer, findNodeNearLatLng, formatDistance, loadJson, resolveNodeByQuery } from './pathtools.js';
 
@@ -16,7 +17,7 @@ const haversineDistance = (a, b) => {
 	return 2 * EARTH_RADIUS * Math.asin(Math.sqrt(h));
 };
 
-const interpolate = (a, b, t) => ({ lat: a.lat + (b.lat - a.lat) * t, lng: a.lng + (b.lng - a.lng) * t });
+const interpolate = (a, b, frac) => ({ lat: a.lat + (b.lat - a.lat) * frac, lng: a.lng + (b.lng - a.lng) * frac });
 
 const curvatureDrop = (d, total) => (d * (total - d)) / (2 * EFFECTIVE_EARTH_RADIUS);
 
@@ -41,11 +42,11 @@ const ELEVATION_PROVIDERS = {
 	sefinek: {
 		label: 'Sefinek API',
 		fetch: async points => {
-			const base = window.MAP_CONFIG?.sefinekApi;
-			if (!base) throw new Error('Adres Sefinek API nie jest skonfigurowany.');
+			const base = window.MAP_CONFIG.sefinekApi;
+			if (!base) throw new Error('Sefinek API address is not configured.');
 
 			const res = await fetchFromLookupApi(`${base}/api/v2/elevation`, points);
-			if (!res.ok) throw new Error(`Sefinek API zwróciło błąd ${res.status}`);
+			if (!res.ok) throw new Error(`Sefinek API returned error ${res.status}`);
 
 			const data = await res.json();
 			return data.results.map(r => r.elevation);
@@ -55,7 +56,7 @@ const ELEVATION_PROVIDERS = {
 		label: 'Open-Elevation',
 		fetch: async points => {
 			const res = await fetchFromLookupApi('https://api.open-elevation.com/api/v1/lookup', points);
-			if (!res.ok) throw new Error(`Open-Elevation zwróciło błąd ${res.status}`);
+			if (!res.ok) throw new Error(`Open-Elevation returned error ${res.status}`);
 
 			const data = await res.json();
 			return data.results.map(r => r.elevation);
@@ -67,7 +68,7 @@ const ELEVATION_PROVIDERS = {
 			const lat = points.map(p => p.lat).join(',');
 			const lng = points.map(p => p.lng).join(',');
 			const res = await fetch(`https://api.open-meteo.com/v1/elevation?latitude=${lat}&longitude=${lng}`);
-			if (!res.ok) throw new Error(`Open-Meteo zwróciło błąd ${res.status}`);
+			if (!res.ok) throw new Error(`Open-Meteo returned error ${res.status}`);
 
 			const data = await res.json();
 			return data.elevation;
@@ -77,13 +78,15 @@ const ELEVATION_PROVIDERS = {
 
 const fetchElevations = (points, source) => (ELEVATION_PROVIDERS[source] || ELEVATION_PROVIDERS.sefinek).fetch(points);
 
+const getCssVar = (name, fallback) => getComputedStyle(document.documentElement).getPropertyValue(name).trim() || fallback;
+
 const COLOR_TERRAIN = '#99a1b5';
 const COLOR_BORDER = 'rgba(148, 166, 204, 0.25)';
 const COLOR_TEXT = '#eef1f8';
 const COLOR_TEXT_MUTED = '#99a1b5';
 const COLOR_GREEN = '#2dd881';
-const COLOR_RED_BRIGHT = '#ff3352';
-const COLOR_RED = '#e01230';
+const COLOR_RED_BRIGHT = getCssVar('--red-bright', '#ff3352');
+const COLOR_RED = getCssVar('--red', '#e01230');
 const COLOR_BLUE = '#4dabf7';
 
 const buildChartSvg = ({ samples, distances, total, elevA, elevB, obstructed }) => {
@@ -114,14 +117,14 @@ const buildChartSvg = ({ samples, distances, total, elevA, elevB, obstructed }) 
 		return `<circle cx="${x(d).toFixed(1)}" cy="${y(e).toFixed(1)}" r="3.2" fill="${COLOR_RED_BRIGHT}" />`;
 	}).join('');
 
-	const gridLines = [0, 0.25, 0.5, 0.75, 1].map(t => {
-		const e = lo + (hi - lo) * t;
+	const gridLines = [0, 0.25, 0.5, 0.75, 1].map(frac => {
+		const e = lo + (hi - lo) * frac;
 		const yy = y(e).toFixed(1);
 		return `<line x1="${padL}" y1="${yy}" x2="${padL + plotW}" y2="${yy}" stroke="${COLOR_BORDER}" stroke-width="1"/>` +
 			`<text x="2" y="${Number(yy) + 4}" text-anchor="start" font-size="13" fill="${COLOR_TEXT_MUTED}" font-family="monospace">${Math.round(e)}</text>`;
 	}).join('');
 
-	return `<svg viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Profil terenu między punktami A i B">
+	return `<svg viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${t('terrain:chartAriaLabel')}">
 		${gridLines}
 		<polygon points="${terrainArea}" fill="${COLOR_TERRAIN}" fill-opacity="0.18" stroke="${COLOR_TERRAIN}" stroke-width="1.5"/>
 		<line x1="${x(0).toFixed(1)}" y1="${y(elevA).toFixed(1)}" x2="${x(total).toFixed(1)}" y2="${y(elevB).toFixed(1)}" stroke="${sightColor}" stroke-width="2.2" stroke-dasharray="5 4"/>
@@ -300,7 +303,7 @@ export const initTerrainTool = ({ map, setPicker, getNodes, showToast, getElevat
 
 	analyzeBtn.addEventListener('click', async () => {
 		if (!points.a || !points.b) {
-			showToast('Wybierz oba punkty: A i B', { status: 'error' });
+			showToast(t('terrain:selectBothPoints'), { status: 'error' });
 			return;
 		}
 
@@ -308,12 +311,12 @@ export const initTerrainTool = ({ map, setPicker, getNodes, showToast, getElevat
 		const heightB = Number(heightBInput.value) || 0;
 		const total = haversineDistance(points.a, points.b);
 		if (total < 10) {
-			showToast('Punkty A i B są zbyt blisko siebie.', { status: 'error' });
+			showToast(t('terrain:pointsTooClose'), { status: 'error' });
 			return;
 		}
 
 		analyzeBtn.disabled = true;
-		const loadingToast = showToast('Pobieranie danych wysokościowych...', { duration: 0, status: 'loading' });
+		const loadingToast = showToast(t('terrain:fetchingElevation'), { duration: 0, status: 'loading' });
 
 		try {
 			const samplePoints = new Array(SAMPLE_COUNT).fill(0).map((_, i) => interpolate(points.a, points.b, i / (SAMPLE_COUNT - 1)));
@@ -339,15 +342,15 @@ export const initTerrainTool = ({ map, setPicker, getNodes, showToast, getElevat
 			resultEl.innerHTML = `
 				<div class="terrain-result-summary">
 					<div class="terrain-result-chip">
-						<span class="terrain-result-chip-label">Dystans</span>
+						<span class="terrain-result-chip-label">${t('terrain:distance')}</span>
 						<span class="terrain-result-chip-value">${formatDistance(total)}</span>
 					</div>
 					<div class="terrain-result-chip">
-						<span class="terrain-result-chip-label">Widoczność optyczna</span>
-						<span class="terrain-result-chip-value ${obstructed ? 'status-blocked' : 'status-ok'}">${obstructed ? 'Zasłonięta' : 'Wolna'}</span>
+						<span class="terrain-result-chip-label">${t('terrain:opticalVisibility')}</span>
+						<span class="terrain-result-chip-value ${obstructed ? 'status-blocked' : 'status-ok'}">${obstructed ? t('terrain:blocked') : t('terrain:lineOfSightClear')}</span>
 					</div>
 					<div class="terrain-result-chip">
-						<span class="terrain-result-chip-label">Najmniejszy prześwit</span>
+						<span class="terrain-result-chip-label">${t('terrain:smallestClearance')}</span>
 						<span class="terrain-result-chip-value">${Math.round(worstClearance)} m</span>
 					</div>
 				</div>
@@ -357,9 +360,9 @@ export const initTerrainTool = ({ map, setPicker, getNodes, showToast, getElevat
 
 			loadingToast.remove();
 		} catch (err) {
-			console.error('Nie udało się przeprowadzić analizy terenu:', err);
+			console.error('Failed to run terrain analysis:', err);
 			loadingToast.remove();
-			showToast('Nie udało się pobrać danych wysokościowych. Spróbuj ponownie.', { status: 'error', duration: 5000 });
+			showToast(t('terrain:fetchElevationFailed'), { status: 'error', duration: 5000 });
 		} finally {
 			analyzeBtn.disabled = false;
 		}
@@ -377,7 +380,7 @@ export const initTerrainTool = ({ map, setPicker, getNodes, showToast, getElevat
 		if (!points.a || !points.b) return;
 
 		const url = `${location.origin}${location.pathname}?terrain=${points.a.lat.toFixed(5)},${points.a.lng.toFixed(5)},${heightAInput.value};${points.b.lat.toFixed(5)},${points.b.lng.toFixed(5)},${heightBInput.value}`;
-		void navigator.clipboard.writeText(url).then(() => showToast('Skopiowano do schowka'));
+		void navigator.clipboard.writeText(url).then(() => showToast(t('common:copiedToClipboard')));
 	});
 
 	const resolveUrlPoint = point => {

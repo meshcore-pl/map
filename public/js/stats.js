@@ -1,3 +1,4 @@
+import { t } from './i18n.js';
 import { initModal } from './modal.js';
 
 const msPerDay = 86400000;
@@ -58,7 +59,7 @@ export const initStatsModal = ({ getNodes, getRepeaters, escapeHtml, timeAgo, on
 					</div>
 				</li>
 			`).join('')
-			: '<li class="stats-repeater-empty">Brak nowych repeaterów w tym okresie.</li>';
+			: `<li class="stats-repeater-empty">${t('stats:noRepeatersInPeriod')}</li>`;
 
 		[...listEl.children].forEach((li, index) => {
 			const node = repeaters[index];

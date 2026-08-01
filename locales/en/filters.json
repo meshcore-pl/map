@@ -1,0 +1,18 @@
+{
+	"toggleTitle": "Toggle filters",
+	"nodeTypesLegend": "Node types",
+	"clients": "Clients",
+	"repeaters": "Repeaters",
+	"roomServers": "Room servers",
+	"sensors": "Sensors",
+	"lastUpdate": "Last update",
+	"added": "Added",
+	"clusteringZoom": "Clustering zoom level",
+	"frequency": "Frequency",
+	"unknownFreq": "Unknown",
+	"apply": "Apply filters",
+	"clearFilters": "Clear filters",
+	"updating": "Updating data...",
+	"updated": "Data updated",
+	"updateFailed": "Failed to update data"
+}

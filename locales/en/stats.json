@@ -1,0 +1,12 @@
+{
+	"toggleTitle": "New nodes and repeaters",
+	"closeAria": "Close statistics",
+	"title": "New nodes",
+	"timeRangeAria": "Time range",
+	"range": "Range",
+	"fromDateAria": "From date",
+	"toDateAria": "To date",
+	"backToRangesAria": "Back to ranges",
+	"noRepeatersInPeriod": "No new repeaters in this period.",
+	"showOnMap": "Show on map"
+}

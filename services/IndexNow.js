@@ -6,8 +6,8 @@ const FILENAME = 'dOsyFkAdpVV3UgT9XcAyyI8mM3PISZCJVgrQQusfuHlZv7Nua3fT2nPaEsz8BQ
 const DOMAIN = pkg.homepage.replace('https://', '');
 const BATCH_SIZE = 10000;
 
-const parseSitemap = () => {
-	const xml = fs.readFileSync('public/sitemap.xml', 'utf8');
+const parseSitemap = async () => {
+	const { data: xml } = await axios.get(`https://${DOMAIN}/sitemap.xml`);
 	return [...xml.matchAll(/<loc>(.*?)<\/loc>/g)].map(m => m[1].trim());
 };
 
@@ -36,7 +36,7 @@ const submitToIndexNow = async (key, urls, batchNum, totalBatches) => {
 	console.log('Domain:', DOMAIN);
 
 	const key = fs.readFileSync(`public/${FILENAME}.txt`, 'utf8').trim();
-	const urls = parseSitemap();
+	const urls = await parseSitemap();
 	console.log(`Parsed URLs: ${urls.length}`);
 
 	const totalBatches = Math.ceil(urls.length / BATCH_SIZE);

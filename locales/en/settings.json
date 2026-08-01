@@ -1,0 +1,14 @@
+{
+	"title": "Settings",
+	"closeAria": "Close settings",
+	"closeFiltersLabel": "Close the filter panel after applying",
+	"closeFiltersDesc": "After clicking \"Apply filters\" the filter panel will close automatically instead of staying open.",
+	"elevationSourceLabel": "Elevation data source (terrain analysis)",
+	"elevationSefinek": "Sefinek API - beta (self-hosted)",
+	"elevationOpenElevation": "Open-Elevation (public)",
+	"elevationOpenMeteo": "Open-Meteo (public)",
+	"elevationDesc": "Used by the \"Terrain and range analysis\" tool. Change it only if you actually need to.",
+	"advanced": "Advanced",
+	"openFreeMapLabel": "Show OpenFreeMap in the map switcher",
+	"openFreeMapDesc": "This is a free vector map based on OpenStreetMap data. Unlike the other maps (plain images, tiles), it requires pulling in an extra rendering library in the browser (~1&nbsp;MB), so it's disabled by default. Enable it only if you actually want to use it."
+}

@@ -2,8 +2,16 @@ process.loadEnvFile();
 const express = require('express');
 const helmet = require('helmet');
 const { version } = require('./package.json');
-const { DOMAIN, NODE_ENV, PORT } = process.env;
+const { DOMAIN, NODE_ENV, PORT, SITE_MODE } = process.env;
 const isProd = NODE_ENV === 'production';
+const siteMode = (SITE_MODE || 'auto').toLowerCase();
+const SITES = require('./config/sites.js');
+
+const resolveSite = req => {
+	if (siteMode === 'poland') return SITES.poland;
+	if (siteMode === 'global') return SITES.global;
+	return SITES.HOSTS[req.hostname] || SITES.default;
+};
 
 // Fetch nodes on boot, then keep the Redis cache warm on an interval
 const { startNodesRefreshJob } = require('./services/nodes.js');
@@ -13,6 +21,9 @@ startNodesRefreshJob();
 const timeout = require('./middlewares/timeout.js');
 const logger = require('./middlewares/morgan.js');
 const globalLimiter = require('./middlewares/ratelimit.js');
+const language = require('./middlewares/language.js');
+const languageNegotiation = require('./middlewares/languageNegotiation.js');
+const { detectLanguagePrefix, isLanguageAgnosticPath } = require('./utils/languageResolver.js');
 const HttpError = require('./utils/httpError.js');
 
 // Create an Express app
@@ -28,6 +39,22 @@ app.locals.sefinekApi = process.env.SEFINEK_API;
 // Use middlewares
 app.use(helmet({ crossOriginResourcePolicy: false, contentSecurityPolicy: false }));
 app.use(express.static('public'));
+app.use((req, res, next) => {
+	req.site = resolveSite(req);
+	next();
+});
+app.use((req, res, next) => {
+	if (isLanguageAgnosticPath(req.path)) return next();
+
+	const detected = detectLanguagePrefix(req.url, req.site.defaultLanguage);
+	if (detected) {
+		req.forcedLanguage = detected.language;
+		req.url = detected.url;
+	}
+	next();
+});
+app.use(languageNegotiation);
+app.use(language);
 app.use(logger);
 if (isProd) app.use(globalLimiter);
 app.use(timeout());

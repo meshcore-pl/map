@@ -1,4 +1,5 @@
 /* global L */
+import { t } from './i18n.js';
 
 export const formatDistance = meters => meters >= 1000 ? `${(meters / 1000).toFixed(2)} km` : `${Math.round(meters)} m`;
 
@@ -60,7 +61,7 @@ export const createPathLayer = ({ map, color = '#4dabf7' }) => {
 				weight: 3,
 				fillColor: color,
 				fillOpacity: 0.85,
-			}).bindTooltip(pt.label || `Punkt ${i + 1}`).addTo(group);
+			}).bindTooltip(pt.label || t('common:pointFallback', { n: i + 1 })).addTo(group);
 		});
 
 		if (points.length < 2) return;

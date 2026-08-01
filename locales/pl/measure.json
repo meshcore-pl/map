@@ -1,0 +1,16 @@
+{
+	"toggleTitle": "Mierz odległość",
+	"closeAria": "Zamknij narzędzie pomiaru",
+	"title": "Mierzenie odległości",
+	"hint": "Kliknij mapę lub na węzeł, aby dokonać pomiaru odległości.",
+	"selectSecondPoint": "Wybrano pierwszy, proszę wybrać drugi.",
+	"noPointsSelected": "Nie wybrano jeszcze żadnych punktów.",
+	"labelModes": {
+		"name": "Nazwy",
+		"bytes1": "1 bajt",
+		"bytes2": "2 bajty",
+		"bytes3": "3 bajty",
+		"mid": "Środek"
+	},
+	"undo": "Cofnij punkt"
+}

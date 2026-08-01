@@ -1,0 +1,52 @@
+const poland = {
+	defaultLanguage: 'pl',
+	defaultRegion: 'pl',
+	defaultView: { lat: 52.1537, lon: 19.3250, zoom: 7 },
+	theme: 'poland',
+	themeColor: '#95010b',
+	languageSwitcher: 'none',
+	showRegionToggle: true,
+	domain: 'mapa.meshcorepolska.org',
+	brandName: 'MeshCore Polska',
+	brandNameHtml: 'MeshCore <strong>Polska</strong>',
+	brandUrl: 'https://meshcorepolska.org/',
+	logo: 'https://meshcorepolska.org/images/brand/logo-1-80.jpg',
+	ogImage: 'https://meshcorepolska.org/images/brand/banner-og.jpg',
+	favicon: 'https://meshcorepolska.org/favicon.ico',
+	icon192: 'https://meshcorepolska.org/images/brand/logo-3-192.png',
+	icon512: 'https://meshcorepolska.org/images/brand/logo-3-512.png',
+	appleIcon: 'https://meshcorepolska.org/images/brand/logo-3-180.png',
+	discordUrl: 'https://meshcorepolska.org/discord',
+};
+
+// TODO: ogImage do podmiany, gdy powstanie docelowy baner
+const global = {
+	defaultLanguage: 'en',
+	defaultRegion: 'all',
+	defaultView: { lat: 29.9836, lon: 7.0313, zoom: 3 },
+	theme: 'global',
+	themeColor: '#4f46e5',
+	languageSwitcher: 'dropdown',
+	showRegionToggle: false,
+	domain: 'map.meshcoreprofiles.com',
+	crossLinks: { pl: 'https://mapa.meshcorepolska.org/' },
+	brandName: 'MeshCore Map',
+	brandNameHtml: 'MeshCore Map',
+	shortName: 'MeshCore',
+	brandUrl: 'https://meshcoreprofiles.com/',
+	logo: '/images/logo-512.svg',
+	ogImage: 'https://meshcorepolska.org/images/brand/banner-og.jpg',
+	favicon: '/favicon.ico',
+	faviconSvg: '/favicon.svg',
+	icon192: '/images/icon-192.png',
+	icon512: '/images/icon-512.png',
+	appleIcon: '/apple-touch-icon.png',
+	discordUrl: 'https://meshcorepolska.org/discord',
+};
+
+const HOSTS = {
+	[poland.domain]: poland,
+	[global.domain]: global,
+};
+
+module.exports = { poland, global, HOSTS, default: poland };

@@ -1,0 +1,14 @@
+{
+	"title": "Ustawienia",
+	"closeAria": "Zamknij ustawienia",
+	"closeFiltersLabel": "Zamykaj okno filtrów po zastosowaniu",
+	"closeFiltersDesc": "Po kliknięciu „Zastosuj filtry” panel filtrów zamknie się automatycznie zamiast pozostać otwarty.",
+	"elevationSourceLabel": "Źródło danych wysokościowych (analiza terenu)",
+	"elevationSefinek": "Sefinek API - beta (self-hosted)",
+	"elevationOpenElevation": "Open-Elevation (publiczne)",
+	"elevationOpenMeteo": "Open-Meteo (publiczne)",
+	"elevationDesc": "Używane przez narzędzie „Analiza terenu i zasięgu”. Zmień, jeśli faktycznie masz taką potrzebę.",
+	"advanced": "Zaawansowane",
+	"openFreeMapLabel": "Pokaż OpenFreeMap w przełączniku map",
+	"openFreeMapDesc": "Jest to darmowa mapa wektorowa oparta na danych OpenStreetMap. W odróżnieniu od pozostałych map (zwykłe obrazki, kafelki) wymaga dociągnięcia dodatkowej biblioteki renderującej w przeglądarce (~1&nbsp;MB), dlatego jest domyślnie wyłączona. Włącz ją tylko, jeśli faktycznie chcesz z niej skorzystać."
+}

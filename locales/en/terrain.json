@@ -1,0 +1,21 @@
+{
+	"toggleTitle": "Terrain and range analysis",
+	"closeAria": "Close terrain analysis",
+	"title": "Terrain and range analysis (beta)",
+	"desc": "Pick two points (click a node on the map or type a name) to see the terrain profile and an approximate line-of-sight visibility between them. You can change the elevation data source in Settings.",
+	"nodeNamePlaceholder": "Node name",
+	"pickOnMap": "Pick on map",
+	"antennaHeightA": "Antenna A height (m)",
+	"antennaHeightB": "Antenna B height (m)",
+	"analyze": "Analyze",
+	"selectBothPoints": "Select both points: A and B",
+	"pointsTooClose": "Points A and B are too close to each other.",
+	"fetchingElevation": "Fetching elevation data...",
+	"distance": "Distance",
+	"opticalVisibility": "Line of sight",
+	"blocked": "Blocked",
+	"lineOfSightClear": "Clear",
+	"smallestClearance": "Smallest clearance",
+	"fetchElevationFailed": "Failed to fetch elevation data. Please try again.",
+	"chartAriaLabel": "Terrain profile between points A and B"
+}

@@ -1,0 +1,21 @@
+{
+	"close": "Close",
+	"cancel": "Cancel",
+	"clear": "Clear",
+	"share": "Share",
+	"copiedToClipboard": "Copied to clipboard",
+	"langLabel": "Language",
+	"mapWord": "Map",
+	"pointFallback": "Point {{n}}",
+	"githubRepoTitle": "Go to the GitHub repository",
+	"timeUnits": {
+		"year": ["year", "years"],
+		"month": ["month", "months"],
+		"day": ["day", "days"],
+		"hour": ["hour", "hours"],
+		"minute": ["minute", "minutes"],
+		"second": ["second", "seconds"]
+	},
+	"timeAgo": "{{count}} {{unit}} ago",
+	"justNow": "just now"
+}

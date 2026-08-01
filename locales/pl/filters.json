@@ -1,0 +1,18 @@
+{
+	"toggleTitle": "Przełącz filtry",
+	"nodeTypesLegend": "Typy węzłów",
+	"clients": "Klienci",
+	"repeaters": "Repeatery",
+	"roomServers": "Serwery pokoju",
+	"sensors": "Czujniki",
+	"lastUpdate": "Ostatnia aktualizacja",
+	"added": "Dodano",
+	"clusteringZoom": "Poziom powiększenia grupowania",
+	"frequency": "Częstotliwość",
+	"unknownFreq": "Nieznana",
+	"apply": "Zastosuj filtry",
+	"clearFilters": "Wyczyść filtry",
+	"updating": "Aktualizowanie danych...",
+	"updated": "Dane zaktualizowane",
+	"updateFailed": "Nie udało się zaktualizować danych"
+}

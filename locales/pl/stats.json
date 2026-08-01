@@ -1,0 +1,12 @@
+{
+	"toggleTitle": "Nowe węzły i repeatery",
+	"closeAria": "Zamknij statystyki",
+	"title": "Nowe węzły",
+	"timeRangeAria": "Zakres czasu",
+	"range": "Zakres",
+	"fromDateAria": "Od daty",
+	"toDateAria": "Do daty",
+	"backToRangesAria": "Wróć do zakresów",
+	"noRepeatersInPeriod": "Brak nowych repeaterów w tym okresie.",
+	"showOnMap": "Pokaż na mapie"
+}

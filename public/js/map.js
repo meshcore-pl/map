@@ -2,6 +2,7 @@
 import { unpack } from '../vendor/msgpackr/msgpackr.js';
 import { toCanvas as qrToCanvas } from '../vendor/qrcode/qrcode.js';
 import * as ntools from './node-utils.js';
+import { t, tRaw, plural } from './i18n.js';
 import { initModal } from './modal.js';
 import { initLegendPanel } from './legend.js';
 import { initStatsModal } from './stats.js';
@@ -56,43 +57,17 @@ const nodeKeys = {
 	},
 };
 
-const types = {
-	'1': 'Klient',
-	'2': 'Repeater',
-	'3': 'Serwer pokoju',
-	'4': 'Czujnik',
-};
-
-const updateStatusDesc = {
-	'none': 'Dodano ręcznie',
-	'recent': 'Zaktualizowano niedawno',
-	'stale': 'Zaktualizowano jakiś czas temu',
-	'old': 'Nie aktualizowano',
-	'extinct': 'Zostanie wkrótce usunięty',
-};
+const nodeTypeKeys = { '1': 'client', '2': 'repeater', '3': 'roomServer', '4': 'sensor' };
+const typeName = type => t(`map:nodeTypes.${nodeTypeKeys[type]}`);
+const statusDesc = status => t(`map:updateStatus.${status}`);
 
 const radioParamDesc = {
-	'bw': {
-		label: 'Szerokość pasma',
-		unit: 'kHz',
-		short: '',
-	},
-	'freq': {
-		label: 'Częstotliwość',
-		unit: 'MHz',
-		short: '',
-	},
-	'sf': {
-		label: 'Współczynnik rozproszenia',
-		unit: '',
-		short: 'SF',
-	},
-	'cr': {
-		label: 'Współczynnik kodowania',
-		unit: '',
-		short: 'CR',
-	},
+	'bw': { unit: 'kHz', short: '' },
+	'freq': { unit: 'MHz', short: '' },
+	'sf': { unit: '', short: 'SF' },
+	'cr': { unit: '', short: 'CR' },
 };
+const radioParamLabel = key => t(`map:radioParams.${key}`);
 
 const statusBadgeClass = {
 	'none': 'badge-status-none',
@@ -105,35 +80,25 @@ const statusBadgeClass = {
 const columnOrder = ['public_key', 'link', 'inserted_date', 'updated_date', 'coords', 'preset', 'params'];
 const paramOrder = ['freq', 'bw', 'sf', 'cr'];
 
-const pluralPl = (count, [one, few, many]) => {
-	if (count === 1) return one;
-
-	const lastDigit = count % 10;
-	const lastTwoDigits = count % 100;
-	if (lastDigit >= 2 && lastDigit <= 4 && !(lastTwoDigits >= 12 && lastTwoDigits <= 14)) return few;
-
-	return many;
-};
-
 const timeAgo = msec => {
 	const seconds = Math.floor((Date.now() - msec) / 1000);
 
 	const units = [
-		{ forms: ['rok', 'lata', 'lat'], limit: 31536000 },
-		{ forms: ['miesiąc', 'miesiące', 'miesięcy'], limit: 2592000 },
-		{ forms: ['dzień', 'dni', 'dni'], limit: 86400 },
-		{ forms: ['godzina', 'godziny', 'godzin'], limit: 3600 },
-		{ forms: ['minuta', 'minuty', 'minut'], limit: 60 },
-		{ forms: ['sekunda', 'sekundy', 'sekund'], limit: 1 },
+		{ key: 'year', limit: 31536000 },
+		{ key: 'month', limit: 2592000 },
+		{ key: 'day', limit: 86400 },
+		{ key: 'hour', limit: 3600 },
+		{ key: 'minute', limit: 60 },
+		{ key: 'second', limit: 1 },
 	];
 
 	for (const unit of units) {
 		const count = Math.floor(seconds / unit.limit);
 
-		if (count >= 1) return `${count} ${pluralPl(count, unit.forms)} temu`;
+		if (count >= 1) return t('common:timeAgo', { count, unit: plural(count, tRaw(`common:timeUnits.${unit.key}`)) });
 	}
 
-	return 'przed chwilą';
+	return t('common:justNow');
 };
 
 const escapeHtml = html => html.replace(/[&<>"']/g, c => `&#${c.charCodeAt(0)};`);
@@ -154,54 +119,54 @@ const withCopyButton = (displayHtml, copyValue, btnTitle, textTitle = '') => `
 
 const columns = {
 	coords: {
-		label: 'Współrzędne',
+		label: t('map:columns.coords'),
 		value: val => withCopyButton(
 			`<a href="https://google.com/maps/place/${val.replace(' ', '')}" class="coords-link" target="_blank" rel="noopener nofollow">${val}</a>`,
 			val,
-			'Kopiuj współrzędne'
+			t('map:copyCoords')
 		),
 	},
 	inserted_date: {
-		label: 'Dodano',
+		label: t('map:columns.insertedDate'),
 		value: val => {
 			const dt = new Date(val);
 			return `<time datetime="${val}" title="${ntools.formatDateTime(dt)}">${timeAgo(dt.getTime())}</time>`;
 		},
 	},
 	updated_date: {
-		label: 'Zaktualizowano',
+		label: t('map:columns.updatedDate'),
 		value: val => {
 			const dt = new Date(val);
 			return `<time datetime="${val}" title="${ntools.formatDateTime(dt)}">${timeAgo(dt.getTime())}</time>`;
 		},
 	},
 	public_key: {
-		label: 'Klucz publiczny',
+		label: t('map:columns.publicKey'),
 		value: val => withCopyButton(
 			escapeHtml(ntools.truncateKey(val)),
 			val,
-			'Kopiuj klucz publiczny',
+			t('map:copyPublicKey'),
 			escapeHtml(val)
 		),
 	},
 	preset: {
-		label: 'Preset radiowy',
+		label: t('map:columns.preset'),
 		value: val => {
 			const preset = findPreset(val);
-			return preset.params?.freq ? preset.name : 'Niestandardowy';
+			return preset.params?.freq ? preset.name : t('map:customPreset');
 		},
 	},
 	params: {
-		label: 'Parametry radiowe',
+		label: t('map:columns.params'),
 		value: val => `<span class="param-chips">${paramOrder.filter(key => key in val).map(key => {
 			const paramKey = radioParamDesc[key];
 			const text = `${paramKey.short}${val[key]}${paramKey.unit}`;
-			return `<span class="param-chip" title="${escapeHtml(paramKey.label)}">${escapeHtml(text)}</span>`;
+			return `<span class="param-chip" title="${escapeHtml(radioParamLabel(key))}">${escapeHtml(text)}</span>`;
 		}).join('')}</span>`,
 	},
 	link: {
-		label: 'Link Meshcore',
-		value: uint8arr => `<button type="button" class="copy-link-btn" data-copy-value="meshcore://${uint8ArrayToHex(uint8arr)}">Skopiuj do schowka</button>`,
+		label: t('map:columns.link'),
+		value: uint8arr => `<button type="button" class="copy-link-btn" data-copy-value="meshcore://${uint8ArrayToHex(uint8arr)}">${t('map:copyLinkButton')}</button>`,
 	},
 };
 
@@ -245,21 +210,21 @@ const discordTimestamp = date => `<t:${Math.floor(date.getTime() / 1000)}:R>`;
 const getNodeInfoText = node => {
 	const lines = [`# ${node.adv_name}`, ''];
 
-	lines.push(`- **Klucz publiczny:** \`${node.public_key}\``);
-	lines.push(`- **Typ:** ${types[node.type]}`);
-	if (node.status) lines.push(`- **Aktualność:** ${updateStatusDesc[node.status]}`);
-	if (node.link) lines.push(`- **Link Meshcore:** \`meshcore://${uint8ArrayToHex(node.link)}\``);
-	lines.push(`- **Dodano:** ${ntools.formatDateTime(node.insertDate)} (${discordTimestamp(node.insertDate)})`);
-	if (node.updatedDate) lines.push(`- **Zaktualizowano:** ${ntools.formatDateTime(node.updatedDate)} (${discordTimestamp(node.updatedDate)})`);
-	lines.push(`- **Współrzędne:** \`${node.coords}\` ([Mapa](https://google.com/maps/place/${node.coords.replace(' ', '')}))`);
+	lines.push(`- **${t('map:columns.publicKey')}:** \`${node.public_key}\``);
+	lines.push(`- **${t('map:infoType')}:** ${typeName(node.type)}`);
+	if (node.status) lines.push(`- **${t('map:infoStatus')}:** ${statusDesc(node.status)}`);
+	if (node.link) lines.push(`- **${t('map:columns.link')}:** \`meshcore://${uint8ArrayToHex(node.link)}\``);
+	lines.push(`- **${t('map:columns.insertedDate')}:** ${ntools.formatDateTime(node.insertDate)} (${discordTimestamp(node.insertDate)})`);
+	if (node.updatedDate) lines.push(`- **${t('map:columns.updatedDate')}:** ${ntools.formatDateTime(node.updatedDate)} (${discordTimestamp(node.updatedDate)})`);
+	lines.push(`- **${t('map:columns.coords')}:** \`${node.coords}\` ([${t('common:mapWord')}](https://google.com/maps/place/${node.coords.replace(' ', '')}))`);
 
 	if (node.params) {
 		const preset = findPreset(node.params);
-		lines.push(`- **Preset radiowy:** ${preset.params?.freq ? preset.name : 'Niestandardowy'}`);
-		lines.push('- **Ustawienia:**');
+		lines.push(`- **${t('map:columns.preset')}:** ${preset.params?.freq ? preset.name : t('map:customPreset')}`);
+		lines.push(`- **${t('settings:title')}:**`);
 		for (const key of paramOrder.filter(k => k in node.params)) {
 			const paramKey = radioParamDesc[key];
-			lines.push(`  - ${paramKey.label}: ${node.params[key]}${paramKey.unit}`);
+			lines.push(`  - ${radioParamLabel(key)}: ${node.params[key]}${paramKey.unit}`);
 		}
 	}
 
@@ -285,24 +250,24 @@ const getNodePopupHTML = node => {
 			<div class="node-header-info">
 				<div class="node-title">
 					<span class="node-title-text">${escapeHtml(node.adv_name)}</span>
-					<button type="button" class="copy-icon-btn" title="Kopiuj nazwę" aria-label="Kopiuj nazwę" data-copy-value="${escapeHtml(node.adv_name)}">
+					<button type="button" class="copy-icon-btn" title="${t('map:copyName')}" aria-label="${t('map:copyName')}" data-copy-value="${escapeHtml(node.adv_name)}">
 						<svg class="icon" aria-hidden="true"><use href="/icons/icons.svg#copy"></use></svg>
 					</button>
 				</div>
 				<div class="node-badges">
-					<span class="badge">${types[node.type]}</span>
-					${node.status ? `<span class="badge ${statusClass}"><span class="badge-dot"></span>${updateStatusDesc[node.status]}</span>` : ''}
+					<span class="badge">${typeName(node.type)}</span>
+					${node.status ? `<span class="badge ${statusClass}"><span class="badge-dot"></span>${statusDesc(node.status)}</span>` : ''}
 				</div>
 			</div>
 		</div>
 		${getTable(node)}
 		<div class="user-actions">
 			<div class="user-actions-left">
-				<button type="button" class="copy-link-btn" data-copy-value="${escapeHtml(shareUrl)}">Udostępnij</button>
-				<button type="button" class="copy-link-btn" data-copy-value="${escapeHtml(getNodeInfoText(node))}">Skopiuj informacje</button>
+				<button type="button" class="copy-link-btn" data-copy-value="${escapeHtml(shareUrl)}">${t('common:share')}</button>
+				<button type="button" class="copy-link-btn" data-copy-value="${escapeHtml(getNodeInfoText(node))}">${t('map:copyInfo')}</button>
 			</div>
 			<div class="user-actions-right">
-				<a href="${getDeletionMailUrl(node)}" target="_blank">Zgłoś usunięcie węzła</a>
+				<a href="${getDeletionMailUrl(node)}" target="_blank">${t('map:reportDeletion')}</a>
 				${userActionAnchor}
 			</div>
 		</div>`;
@@ -326,7 +291,7 @@ const getPresets = async signal => {
 	}));
 
 	presets.unshift({
-		name: 'Wszystkie presety',
+		name: t('map:allPresetsOption'),
 		params: {},
 	});
 
@@ -364,33 +329,8 @@ const baseMaps = {
 	}),
 };
 
-const OSM_COPYRIGHT_LINK = '<a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>';
-const CARTO_ATTRIBUTION = 'Kafelki: &copy; <a href="https://carto.com/attributions">CARTO</a>';
-
-const baseMapAttributions = {
-	'CartoDB Dark': CARTO_ATTRIBUTION,
-	'CartoDB Positron': CARTO_ATTRIBUTION,
-	'OpenStreetMap': `Kafelki: &copy; ${OSM_COPYRIGHT_LINK}`,
-	'Esri Satellite': 'Kafelki: &copy; Esri',
-	'OpenTopoMap': 'Kafelki: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (CC-BY-SA)',
-	'CyclOSM': `Kafelki: &copy; <a href="https://www.cyclosm.org">CyclOSM</a> &copy; ${OSM_COPYRIGHT_LINK}`,
-	'Humanitarian OSM': `Kafelki: &copy; <a href="https://www.hotosm.org">HOT</a> &copy; ${OSM_COPYRIGHT_LINK}`,
-	[OPENFREEMAP_NAME]: `Kafelki: &copy; <a href="https://openfreemap.org">OpenFreeMap</a> &copy; <a href="https://www.openmaptiles.org">OpenMapTiles</a> Dane: &copy; ${OSM_COPYRIGHT_LINK}`,
-};
-
-const CARTO_INFO = 'Bezpłatna i bez deklarowanego limitu zapytań, ale nieprzeznaczona do obsługi bardzo dużego ruchu.';
-const OSM_FR_INFO = 'Korzysta z serwera społecznościowego openstreetmap.fr, dlatego należy zachować umiarkowany poziom ruchu.';
-
-const baseMapInfo = {
-	'CartoDB Dark': `Ciemna mapa uliczna od CARTO. ${CARTO_INFO}`,
-	'CartoDB Positron': `Jasna, minimalistyczna mapa uliczna od CARTO. ${CARTO_INFO}`,
-	'OpenStreetMap': 'Standardowa mapa OpenStreetMap z oficjalnego serwera kafelków. Przeznaczona do zwykłego przeglądania, bez masowego pobierania, intensywnego buforowania i użytku offline.',
-	'Esri Satellite': 'Zdjęcia satelitarne z warstwy Esri World Imagery. Bezpłatne do zastosowań niekomercyjnych.',
-	'OpenTopoMap': 'Mapa topograficzna udostępniana przez serwer społecznościowy o ograniczonej przepustowości. Należy unikać generowania dużego ruchu.',
-	'CyclOSM': `Mapa rowerowa oparta na danych OpenStreetMap. ${OSM_FR_INFO}`,
-	'Humanitarian OSM': `Humanitarny styl mapy OpenStreetMap opracowany przez HOT. ${OSM_FR_INFO}`,
-	[OPENFREEMAP_NAME]: 'Wektorowa mapa uliczna wyświetlana przez MapLibre. Bezpłatna i bez deklarowanego limitu zapytań, ale wymaga obsługi WebGL i może bardziej obciążać urządzenie.',
-};
+const baseMapAttributions = tRaw('map:tilesAttribution');
+const baseMapInfo = tRaw('map:baseMapInfo');
 
 const baseMapOrder = ['CartoDB Dark', 'CartoDB Positron', 'OpenStreetMap', 'Esri Satellite', 'OpenTopoMap', 'CyclOSM', 'Humanitarian OSM'];
 
@@ -401,7 +341,7 @@ const storedBaseMap = localStorage.getItem('baseMapSelected');
 const baseMapSelected = getBaseMapOrder().includes(storedBaseMap) ? storedBaseMap : baseMapOrder[0];
 
 const urlParams = Object.fromEntries(new URLSearchParams(location.search));
-let initialView = { lat: 52.1874, lon: 19.2371, zoom: 7 };
+let initialView = window.MAP_CONFIG.defaultView;
 if (Number(urlParams.lat) && Number(urlParams.lon) && Number(urlParams.zoom)) {
 	initialView = urlParams;
 }
@@ -415,7 +355,7 @@ const map = window.leafletMap = L.map('map', {
 	zoomControl: false,
 }).setView([initialView.lat, initialView.lon], initialView.zoom);
 
-map.attributionControl.setPrefix('<a href="https://leafletjs.com" title="Biblioteka JS do map interaktywnych">Leaflet</a>');
+map.attributionControl.setPrefix(`<a href="https://leafletjs.com" title="${t('map:leafletTitle')}">Leaflet</a>`);
 map.attributionControl.setPosition('bottomleft');
 
 map.createPane('highlightPane');
@@ -432,7 +372,7 @@ const renderQrCode = qrEl => {
 		margin: 1,
 		color: { dark: '#000', light: '#fff' },
 		errorCorrectionLevel: 'M',
-	}).catch(err => console.error('Nie udało się wygenerować kodu QR:', err));
+	}).catch(err => console.error('Failed to generate QR code:', err));
 };
 
 map.on('popupopen', e => {
@@ -450,7 +390,7 @@ const loadMaplibreGL = () => {
 		const script = document.createElement('script');
 		script.src = src;
 		script.onload = resolve;
-		script.onerror = () => reject(new Error(`Nie udało się wczytać ${src}`));
+		script.onerror = () => reject(new Error(`Failed to load ${src}`));
 		document.head.appendChild(script);
 	});
 
@@ -501,7 +441,7 @@ const setBaseMap = async name => {
 };
 
 void setBaseMap(baseMapSelected).catch(err => {
-	console.error('Nie udało się ustawić mapy bazowej:', err);
+	console.error('Failed to set the base map:', err);
 	void setBaseMap(baseMapOrder[0]);
 });
 
@@ -529,6 +469,9 @@ const highlightIcons = Object.fromEntries(Object.keys(nodeTypeIconNames).map(id 
 	iconSize: [56, 56],
 	iconAnchor: [28, 28],
 })]));
+
+const langSelect = document.getElementById('lang-select');
+langSelect?.addEventListener('change', () => { location.href = langSelect.value; });
 
 const loadingOverlay = document.getElementById('loading-overlay');
 const loadingStatus = document.getElementById('loading-status');
@@ -591,7 +534,7 @@ const savedFilters = loadSavedFilters();
 
 const state = {
 	search: '',
-	region: storedRegion === 'all' ? 'all' : 'pl',
+	region: regionToggle && (storedRegion === 'all' || storedRegion === 'pl') ? storedRegion : window.MAP_CONFIG.defaultRegion,
 	nodeFilter: savedFilters.nodeFilter ?? ['1', '2', '3', '4'],
 	freqFilter: savedFilters.freqFilter ?? [],
 	availableFreqs: [],
@@ -636,7 +579,7 @@ const showNodesHighlight = nodes => {
 	if (highlightToast) dismissToast(highlightToast);
 
 	if (!nodes.length) {
-		showToast('Brak węzłów w wybranym okresie.', { status: 'info' });
+		showToast(t('map:noNodesInPeriod'), { status: 'info' });
 		return;
 	}
 
@@ -646,7 +589,7 @@ const showNodesHighlight = nodes => {
 
 	map.fitBounds(highlightLayer.getBounds(), { padding: [60, 60], maxZoom: 15 });
 
-	const message = `Podświetlono ${nodes.length} ${pluralPl(nodes.length, ['nowy węzeł', 'nowe węzły', 'nowych węzłów'])}`;
+	const message = t('map:highlightedNodes', { count: nodes.length, unit: plural(nodes.length, tRaw('map:newNodeUnit')) });
 	highlightToast = showActionToast(message, { status: 'info', onClose: clearHighlight });
 };
 
@@ -846,16 +789,18 @@ const syncUrlParams = () => {
 		zoom: map.getZoom(),
 	};
 
-	history.replaceState({}, '', `/?${new URLSearchParams(params)}`);
+	history.replaceState({}, '', `${location.pathname}?${new URLSearchParams(params)}`);
 };
 
 const updateRegionToggleUI = () => {
+	if (!regionToggle) return;
+
 	const showingAll = state.region === 'all';
 	regionToggle.classList.toggle('active', showingAll);
-	const regionToggleTitle = showingAll ? 'Pokaż tylko polskie węzły' : 'Pokaż wszystkie węzły na świecie';
+	const regionToggleTitle = showingAll ? t('map:showPolandOnly') : t('map:showAllWorld');
 	regionToggle.title = regionToggleTitle;
 	regionToggle.setAttribute('aria-label', regionToggleTitle);
-	regionToggleLabel.textContent = showingAll ? 'Wszystkie węzły' : 'Tylko Polska';
+	regionToggleLabel.textContent = showingAll ? t('map:allNodesLabel') : t('map:polandOnlyLabel');
 };
 
 const updateFiltersActiveUI = () => {
@@ -880,10 +825,10 @@ const renderStats = () => {
 	}
 
 	statsCounts.innerHTML = `
-		<span class="pointer-help" title="Łączna liczba węzłów spełniających filtry"><span class="stats-total-label">razem: </span><b>${nodes.length}</b></span>&nbsp;|
-		<svg class="icon pointer-help"><title>Liczba klientów spełniających filtry</title><use href="/icons/icons.svg#user"></use></svg><b>${clients}</b>&nbsp;|
-		<svg class="icon icon-filled pointer-help"><title>Liczba repeaterów spełniających filtry</title><use href="/icons/node-types.svg#repeater-plain"></use></svg><b>${repeaters}</b>&nbsp;|
-		<svg class="icon icon-filled pointer-help"><title>Liczba room serwerów spełniających filtry</title><use href="/icons/node-types.svg#room-server-plain"></use></svg><b>${roomServers}</b>`;
+		<span class="pointer-help" title="${t('map:totalCountTooltip')}"><span class="stats-total-label">${t('map:totalLabel')}</span><b>${nodes.length}</b></span>&nbsp;|
+		<svg class="icon pointer-help"><title>${t('map:clientsCountTooltip')}</title><use href="/icons/icons.svg#user"></use></svg><b>${clients}</b>&nbsp;|
+		<svg class="icon icon-filled pointer-help"><title>${t('map:repeatersCountTooltip')}</title><use href="/icons/node-types.svg#repeater-plain"></use></svg><b>${repeaters}</b>&nbsp;|
+		<svg class="icon icon-filled pointer-help"><title>${t('map:roomServersCountTooltip')}</title><use href="/icons/node-types.svg#room-server-plain"></use></svg><b>${roomServers}</b>`;
 
 	statsModal.render();
 };
@@ -971,16 +916,16 @@ const applyFilters = ({ silent = false } = {}) => {
 	}
 
 	filterToast = filterToast?.isConnected
-		? updateToast(filterToast, 'Aktualizowanie danych...', { duration: 0, status: 'loading' })
-		: showToast('Aktualizowanie danych...', { duration: 0, status: 'loading' });
+		? updateToast(filterToast, t('filters:updating'), { duration: 0, status: 'loading' })
+		: showToast(t('filters:updating'), { duration: 0, status: 'loading' });
 
 	requestAnimationFrame(() => requestAnimationFrame(() => {
 		try {
 			runFilterPass();
-			updateToast(filterToast, 'Dane zaktualizowane', { duration: 1000, status: 'success' });
+			updateToast(filterToast, t('filters:updated'), { duration: 1000, status: 'success' });
 		} catch (err) {
-			console.error('Nie udało się zaktualizować danych:', err);
-			updateToast(filterToast, 'Nie udało się zaktualizować danych', { status: 'error' });
+			console.error('Failed to update data:', err);
+			updateToast(filterToast, t('filters:updateFailed'), { status: 'error' });
 		}
 	}));
 };
@@ -998,7 +943,7 @@ const renderFreqFilters = () => {
 	const unknownCheckboxHtml = state.hasUnknownFreq ? `
 		<label class="checkbox-label">
 			<input type="checkbox" class="freq-unknown-checkbox" ${state.includeUnknownFreq ? 'checked' : ''}>
-			Nieznana
+			${t('filters:unknownFreq')}
 		</label>
 	` : '';
 
@@ -1087,11 +1032,11 @@ const downloadNodes = async region => {
 	try {
 		setLoading(true);
 
-		setLoadingStatus('Łączenie z serwerem...');
+		setLoadingStatus(t('map:connecting'));
 		const nodesReq = await fetch(apiUrl(region), { signal: abortController.signal });
 
 		if (!nodesReq.ok) {
-			let message = `Serwer zwrócił błąd ${nodesReq.status}`;
+			let message = t('map:serverError', { status: nodesReq.status });
 			try {
 				const body = await nodesReq.json();
 				if (body?.message) message = body.message;
@@ -1106,7 +1051,7 @@ const downloadNodes = async region => {
 		const totalBytes = Number(nodesReq.headers.get('Content-Length')) || 0;
 		setLoadingProgress('connect');
 
-		setLoadingStatus('Pobieranie danych...');
+		setLoadingStatus(t('map:downloading'));
 		const reader = nodesReq.body.getReader();
 		const chunks = [];
 		let receivedBytes = 0;
@@ -1123,7 +1068,7 @@ const downloadNodes = async region => {
 		}
 
 		setLoadingProgress('download');
-		loadingMeta.textContent = `${ntools.formatBytes(receivedBytes)} / ${ntools.formatBytes(totalBytes)} · Ukończono`;
+		loadingMeta.textContent = `${ntools.formatBytes(receivedBytes)} / ${ntools.formatBytes(totalBytes)} · ${t('map:downloadComplete')}`;
 
 		const nodesBuffer = new Uint8Array(receivedBytes);
 		let writeOffset = 0;
@@ -1132,7 +1077,7 @@ const downloadNodes = async region => {
 			writeOffset += chunk.length;
 		}
 
-		setLoadingStatus('Rozpakowywanie danych...');
+		setLoadingStatus(t('map:unpacking'));
 		const nodes = unpack(nodesBuffer);
 		setLoadingProgress('unpack');
 
@@ -1146,9 +1091,9 @@ const downloadNodes = async region => {
 		for (let offset = 0; offset < nodes.length; offset += CHUNK_SIZE) {
 			const end = Math.min(offset + CHUNK_SIZE, nodes.length);
 
-			if (abortController.signal.aborted) throw new DOMException('Anulowano przez użytkownika', 'AbortError');
+			if (abortController.signal.aborted) throw new DOMException('Cancelled by user', 'AbortError');
 
-			setLoadingStatus(`Przetwarzanie węzłów... (${end} / ${nodes.length})`);
+			setLoadingStatus(t('map:processingNodes', { end, total: nodes.length }));
 			setLoadingProgress('process', end / nodes.length);
 			if (offset > 0) await new Promise(r => setTimeout(r, 0));
 
@@ -1182,25 +1127,25 @@ const downloadNodes = async region => {
 			}
 		}
 
-		if (abortController.signal.aborted) throw new DOMException('Anulowano przez użytkownika', 'AbortError');
+		if (abortController.signal.aborted) throw new DOMException('Cancelled by user', 'AbortError');
 
-		setLoadingStatus('Uzyskiwanie presetów radiowych...');
+		setLoadingStatus(t('map:fetchingPresets'));
 		setLoadingProgress('presets', 0);
 		try {
 			await presetsPromise;
 		} catch (err) {
 			if (err.name === 'AbortError') throw err;
-			console.error('Nie udało się pobrać presetów radiowych:', err);
+			console.error('Failed to fetch radio presets:', err);
 		}
 		setLoadingProgress('presets');
 
-		setLoadingStatus('Gotowe.');
+		setLoadingStatus(t('map:ready'));
 
 		nodesCache[region] = { nodes, byType, availableFreqs: [...freqSet].sort((a, b) => a - b), hasUnknownFreq, dataUpdatedAt };
 		applyDownloadedNodes(nodesCache[region]);
 	} catch (err) {
 		if (err.name !== 'AbortError') {
-			const message = err.isApiError ? err.message : 'Wystąpił nieoczekiwany błąd podczas wczytywania danych. Spróbuj odświeżyć stronę.';
+			const message = err.isApiError ? err.message : t('map:unexpectedLoadError');
 			showToast(message, { status: 'error', duration: 6000 });
 			console.error(err);
 		}
@@ -1228,7 +1173,7 @@ searchInline.addEventListener('submit', e => e.preventDefault());
 searchInput.addEventListener('focus', () => {
 	if (localStorage.getItem('shiftSearchHintShown')) return;
 	localStorage.setItem('shiftSearchHintShown', '1');
-	showToast('Wskazówka: wciśnij Shift, aby przejść od razu do wyszukiwania', { duration: 4000, status: 'info' });
+	showToast(t('map:shiftSearchHint'), { duration: 4000, status: 'info' });
 }, { once: true });
 
 searchInput.addEventListener('input', () => {
@@ -1352,12 +1297,12 @@ const getRegionDataSize = async region => {
 	}
 };
 
-regionToggle.addEventListener('click', async () => {
+regionToggle?.addEventListener('click', async () => {
 	const targetRegion = state.region === 'all' ? 'pl' : 'all';
 
 	if (targetRegion === 'all' && !nodesCache.all && !localStorage.getItem('regionWarningAcknowledged')) {
 		const size = await getRegionDataSize('all');
-		regionWarningSizeEl.textContent = size ? `około ${ntools.formatBytes(size)}` : 'nieznany rozmiar';
+		regionWarningSizeEl.textContent = size ? t('map:aboutSize', { size: ntools.formatBytes(size) }) : t('map:unknownSize');
 
 		const confirmed = await confirmRegionWarning();
 		if (!confirmed) return;
@@ -1398,17 +1343,17 @@ basemapMenu.addEventListener('click', e => {
 	basemapMenu.hidden = true;
 
 	const loadingToast = currentBaseMap === OPENFREEMAP_NAME && !baseMaps[OPENFREEMAP_NAME]
-		? showToast('Wczytywanie mapy...', { duration: 0, status: 'loading' })
+		? showToast(t('map:loadingBasemap'), { duration: 0, status: 'loading' })
 		: null;
 
 	setBaseMap(currentBaseMap)
 		.then(() => {
-			if (loadingToast) updateToast(loadingToast, 'Mapa wczytana', { duration: 1000, status: 'success' });
+			if (loadingToast) updateToast(loadingToast, t('map:basemapLoaded'), { duration: 1000, status: 'success' });
 		})
 		.catch(err => {
-			console.error('Nie udało się ustawić mapy bazowej:', err);
-			if (loadingToast) updateToast(loadingToast, 'Nie udało się wczytać mapy', { status: 'error' });
-			else showToast('Nie udało się wczytać mapy', { status: 'error' });
+			console.error('Failed to set the base map:', err);
+			if (loadingToast) updateToast(loadingToast, t('map:basemapLoadFailed'), { status: 'error' });
+			else showToast(t('map:basemapLoadFailed'), { status: 'error' });
 		});
 });
 
@@ -1420,7 +1365,7 @@ basemapToggle.addEventListener('click', () => {
 
 document.addEventListener('click', e => {
 	const copyBtn = e.target.closest('.copy-link-btn, .copy-icon-btn');
-	if (copyBtn) void navigator.clipboard.writeText(copyBtn.dataset.copyValue).then(() => showToast('Skopiowano do schowka'));
+	if (copyBtn) void navigator.clipboard.writeText(copyBtn.dataset.copyValue).then(() => showToast(t('common:copiedToClipboard')));
 });
 
 document.addEventListener('click', e => {
