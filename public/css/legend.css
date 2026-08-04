@@ -1,6 +1,6 @@
 .settings-panel#legend-panel {
-	max-width: 610px;
 	gap: 12px;
+	max-width: 610px;
 }
 
 .settings-panel#changelog-panel {
@@ -10,16 +10,15 @@
 }
 
 @media (max-width: 800px) {
-	.settings-panel#legend-panel,
-	.settings-panel#changelog-panel {
+	.settings-panel#legend-panel, .settings-panel#changelog-panel {
 		max-width: calc(100vw - 28px);
 	}
 }
 
 @media (max-width: 480px) {
 	#legend-columns {
-		grid-template-columns: 1fr;
 		row-gap: 14px;
+		grid-template-columns: 1fr;
 	}
 
 	#legend-footer {
@@ -44,13 +43,12 @@
 	gap: 6px;
 	padding-bottom: 12px;
 	border-bottom: 1px solid var(--border);
+	color: var(--text-muted);
 	font-size: 14px;
 	line-height: 1.45;
-	color: var(--text-muted);
 }
 
-#legend-plans p,
-#legend-plans ul {
+#legend-plans p, #legend-plans ul {
 	margin: 0;
 }
 
@@ -96,13 +94,13 @@
 #legend-footer {
 	display: flex;
 	flex-direction: row;
-	align-items: flex-end;
 	justify-content: space-between;
+	align-items: flex-end;
 	gap: 10px;
 	padding-top: 8px;
 	border-top: 1px solid var(--border);
-	font-size: 13px;
 	color: var(--text-muted);
+	font-size: 13px;
 }
 
 #legend-footer-meta {
@@ -116,38 +114,38 @@
 }
 
 #changelog-list {
-	list-style: none;
-	margin: 0;
-	padding: 0;
 	display: flex;
 	flex-direction: column;
 	gap: 16px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
 }
 
 .changelog-version-title {
 	display: flex;
 	align-items: baseline;
 	gap: 8px;
+	margin-bottom: 6px;
+	color: var(--text);
 	font-size: 17px;
 	font-weight: 700;
-	color: var(--text);
-	margin-bottom: 6px;
 }
 
 .changelog-version-date {
+	color: var(--text-muted);
 	font-size: 13px;
 	font-weight: 400;
-	color: var(--text-muted);
-	cursor: default;
 	text-decoration: none;
+	cursor: default;
 }
 
 .changelog-changes {
-	margin: 0;
-	padding-left: 20px;
 	display: flex;
 	flex-direction: column;
 	gap: 4px;
-	font-size: 15px;
+	margin: 0;
+	padding-left: 20px;
 	color: var(--text-muted);
+	font-size: 15px;
 }

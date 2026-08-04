@@ -4,25 +4,25 @@
 
 #measure-panel {
 	position: fixed;
-	z-index: 999;
-	left: 8px;
 	bottom: 30px;
+	left: 8px;
+	z-index: 999;
+	display: flex;
+	flex-direction: column;
 	width: 430px;
 	max-width: calc(100vw - 28px);
 	max-height: calc(60vh - 14px);
 	max-height: calc(60dvh - 14px);
-	display: flex;
-	flex-direction: column;
 	padding: 14px;
-	color: var(--text);
-	background: var(--bg-panel);
-	-webkit-backdrop-filter: blur(6px);
-	backdrop-filter: blur(6px);
 	border: 1px solid var(--border);
 	border-radius: var(--radius);
-	box-shadow: var(--shadow-lg);
+	background: var(--bg-panel);
+	color: var(--text);
 	opacity: 1;
+	box-shadow: var(--shadow-lg);
 	transform: translateY(0) scale(1);
+	-webkit-backdrop-filter: blur(6px);
+	backdrop-filter: blur(6px);
 	transition: opacity 0.18s var(--ease), transform 0.18s var(--ease), display 0.18s allow-discrete;
 }
 
@@ -41,8 +41,8 @@
 
 #tool-panel-header {
 	display: flex;
-	align-items: center;
 	justify-content: space-between;
+	align-items: center;
 	gap: 10px;
 	margin-bottom: 6px;
 }
@@ -57,13 +57,17 @@
 }
 
 .tool-panel-total {
-	font-family: var(--font-mono);
-	font-weight: 700;
-	font-size: 15px;
-	background: var(--brand-gradient, var(--red-bright));
+	background:
+			var(
+					--brand-gradient,
+					var(--red-bright)
+			);
 	-webkit-background-clip: text;
 	background-clip: text;
 	color: transparent;
+	font-family: var(--font-mono);
+	font-size: 15px;
+	font-weight: 700;
 }
 
 #measure-close-btn {
@@ -80,32 +84,32 @@
 
 #tool-panel-hint {
 	margin: 0 0 10px;
+	color: var(--text-muted);
 	font-size: 13px;
 	line-height: 1.4;
-	color: var(--text-muted);
 }
 
 .tool-panel-list {
-	list-style: none;
-	margin: 0 0 10px;
-	padding: 0;
-	flex: 1 1 auto;
-	min-height: 0;
-	overflow-y: auto;
-	overscroll-behavior: contain;
 	display: flex;
+	overflow-y: auto;
+	flex: 1 1 auto;
 	flex-direction: column;
 	gap: 2px;
+	min-height: 0;
+	margin: 0 0 10px;
+	padding: 0;
+	list-style: none;
+	overscroll-behavior: contain;
 }
 
 .tool-panel-list li {
 	display: flex;
-	align-items: center;
 	justify-content: space-between;
+	align-items: center;
 	gap: 10px;
 	padding: 6px 4px;
-	font-size: 14px;
 	border-bottom: 1px solid var(--border);
+	font-size: 14px;
 }
 
 .tool-panel-list li:last-child {
@@ -114,8 +118,8 @@
 
 .tool-panel-list li b {
 	flex-shrink: 0;
-	font-family: var(--font-mono);
 	color: var(--text);
+	font-family: var(--font-mono);
 }
 
 .tool-panel-list li.tool-panel-error {
@@ -125,21 +129,21 @@
 li.tool-panel-empty {
 	display: block;
 	padding: 10px 4px;
-	text-align: center;
 	color: var(--text-muted);
 	font-size: 14px;
+	text-align: center;
 }
 
 .segment-label {
+	padding: 3px 8px;
+	border: 1px solid var(--border-strong);
+	border-radius: var(--radius-sm);
+	background: var(--bg-panel-solid);
+	color: var(--text);
 	font-family: var(--font-mono);
 	font-size: 14px;
 	font-weight: 600;
-	padding: 3px 8px;
 	white-space: nowrap;
-	color: var(--text);
-	background: var(--bg-panel-solid);
-	border: 1px solid var(--border-strong);
-	border-radius: var(--radius-sm);
 	box-shadow: var(--shadow);
 	transform: translate(-50%, -50%);
 }
@@ -158,7 +162,7 @@ li.tool-panel-empty {
 
 .modal-title {
 	margin-bottom: 4px;
-	font-size: 19px
+	font-size: 19px;
 }
 
 #route-actions {
@@ -194,11 +198,11 @@ li.tool-panel-empty {
 }
 
 .terrain-point {
-	flex: 1;
-	min-width: 0;
 	display: flex;
+	flex: 1;
 	align-items: center;
 	gap: 8px;
+	min-width: 0;
 	padding: 6px 6px 6px 10px;
 	border: 1px solid var(--border);
 	border-radius: var(--radius-sm);
@@ -206,16 +210,16 @@ li.tool-panel-empty {
 }
 
 .terrain-point-label {
-	flex-shrink: 0;
 	display: flex;
-	align-items: center;
+	flex-shrink: 0;
 	justify-content: center;
+	align-items: center;
 	width: 22px;
 	height: 22px;
 	border-radius: 50%;
-	font-weight: 700;
-	font-size: 13px;
 	color: #fff;
+	font-size: 13px;
+	font-weight: 700;
 }
 
 #terrain-point-label-a {
@@ -229,12 +233,12 @@ li.tool-panel-empty {
 .terrain-point-input {
 	flex: 1;
 	min-width: 0;
-	font: inherit;
-	font-size: 14px;
 	padding: 6px 0;
 	border: none;
 	background: transparent;
 	color: var(--text);
+	font: inherit;
+	font-size: 14px;
 }
 
 .terrain-point-input:focus {
@@ -291,17 +295,17 @@ li.tool-panel-empty {
 
 .terrain-result-chip-label {
 	display: block;
+	color: var(--text-muted);
 	font-family: var(--font-mono);
 	font-size: 13px;
 	letter-spacing: 0.05em;
 	text-transform: uppercase;
-	color: var(--text-muted);
 }
 
 .terrain-result-chip-value {
+	color: var(--text);
 	font-size: 15px;
 	font-weight: 700;
-	color: var(--text);
 }
 
 .terrain-result-chip-value.status-ok {
@@ -313,8 +317,8 @@ li.tool-panel-empty {
 }
 
 .terrain-chart-wrap {
-	width: 100%;
 	overflow-x: auto;
+	width: 100%;
 }
 
 .terrain-chart-wrap svg {
@@ -329,8 +333,8 @@ li.tool-panel-empty {
 	}
 
 	#measure-panel {
-		left: 8px;
 		bottom: 8px;
+		left: 8px;
 		width: calc(100vw - 78px);
 		max-height: calc(70vh - 8px);
 		max-height: calc(70dvh - 8px);
